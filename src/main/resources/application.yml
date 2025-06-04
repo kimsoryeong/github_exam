@@ -3,10 +3,14 @@ spring:
     name: demo
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://localhost:3306/SB_AM
+    url: jdbc:mysql://localhost:3306/KinderReview
     username: root
     password: 
+  mvc:
+    view:
+      prefix: /WEB-INF/jsp/
+      suffix: .jsp
 server:
-  port: 8081
+  port: 8080
 #  servlet:
-#    context-path: /test	
+#    context-path: /test

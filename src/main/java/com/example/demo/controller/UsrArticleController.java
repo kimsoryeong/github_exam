@@ -3,83 +3,133 @@ package com.example.demo.controller;
 import java.util.List;
 
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.example.demo.dto.Article;
+import com.example.demo.dto.Board;
+import com.example.demo.dto.Req;
 import com.example.demo.service.ArticleService;
+import com.example.demo.service.BoardService;
+import com.example.demo.util.Util;
 
 @Controller
 public class UsrArticleController {
 	
 	private ArticleService articleService;
+	private BoardService boardService;
+	private Req req;
 	
-	public UsrArticleController(ArticleService articleService) {
+	public UsrArticleController(ArticleService articleService, BoardService boardService, Req req) {
 		this.articleService = articleService;
+		this.boardService = boardService;
+		this.req = req;
 	}
 	
-	@GetMapping("/usr/article/write")
-	@ResponseBody
-	public String write(String title, String content) {
-		
-		this.articleService.writeArticle(title, content);
-		
-		return String.format("게시물이 생성되었습니다.");
+	@GetMapping("/usr/article/interviewWrite")
+	public String interviewWrite() {
+		return "usr/article/interviewWrite";
+	}
+
+	@GetMapping("/usr/article/practiceWrite")
+	public String practiceWrite() {
+		return "usr/article/interviewWrite";
 	}
 	
-	@GetMapping("/usr/article/list")
+	@GetMapping("/usr/article/workingWrite")
+	public String workingWrite() {
+		return "usr/article/workingWrite";
+	}
+	
+	@PostMapping("/usr/article/doWrite")
 	@ResponseBody
-	public Object list() {
+	public String doWrite(String title, String content, int boardId) {
 		
-		List<Article> articles = this.articleService.getArticles();
+		this.articleService.writeArticle(title, content, this.req.getLoginedMember().getId(), boardId);
 		
-		if (articles.size() == 0) {
-			return "게시물이 존재하지 않습니다";
+		int id = this.articleService.getLastArticleId();
+		
+		return Util.jsReplace("게시글 작성!", String.format("detail?id=%d", id));
+	}
+	
+	
+	@GetMapping("/usr/article/List")
+	public String List(Model model, int boardId, @RequestParam(defaultValue = "1") int cPage) {
+		
+		int articlesInPage = 10;
+		int limitFrom = (cPage - 1) * articlesInPage;
+		
+		int articlesCnt = this.articleService.getArticlesCnt(boardId);
+		
+		int totalPagesCnt = (int) Math.ceil(articlesCnt / (double) articlesInPage);
+	
+		int begin = ((cPage - 1) / 10) * 10 + 1;
+		int end = (((cPage - 1) / 10) + 1) * 10;
+		
+		if (end > totalPagesCnt) {
+			end = totalPagesCnt;
 		}
 		
-		return articles;
+		Board board = this.boardService.getBoard(boardId);
+		List<Article> articles = this.articleService.getArticles(boardId, articlesInPage, limitFrom);
+		
+		model.addAttribute("cPage", cPage);
+		model.addAttribute("begin", begin);
+		model.addAttribute("end", end);
+		model.addAttribute("totalPagesCnt", totalPagesCnt);
+		model.addAttribute("articlesCnt", articlesCnt);
+		model.addAttribute("articles", articles);
+		model.addAttribute("board", board);
+		
+		return "usr/article/list";
 	}
 	
 	@GetMapping("/usr/article/detail")
-	@ResponseBody
-	public Object detail(int id) {
+	public Object detail(Model model, int id) {
 		
 		Article article = this.articleService.getArticleById(id);
 		
-		if (article == null) {
-			return String.format("%d번 게시물은 존재하지 않습니다", id);
-		}
+		model.addAttribute("article", article);
 		
-		return article;
+		return "usr/article/detail";
 	}
 	
 	@GetMapping("/usr/article/modify")
-	@ResponseBody
-	public String modify(int id, String title, String content) {
+	public String modify(Model model, int id) {
 		
-//		Article article = this.articleService.getArticleById(id);
-//		
-//		if (article == null) {
-//			return String.format("%d번 게시물은 존재하지 않습니다", id);
-//		}
+		Article article = this.articleService.getArticleById(id);
+		
+		model.addAttribute("article", article);
+		
+		return "usr/article/modify";
+	}
+	
+	@PostMapping("/usr/article/doModify")
+	@ResponseBody
+	public String doModify(int id, String title, String content) {
 		
 		this.articleService.modifyArticle(id, title, content);
 		
-		return String.format("%d번 게시물을 수정했습니다", id);
+		return Util.jsReplace(String.format("%d번 게시물을 수정했습니다", id), String.format("detail?id=%d", id));
 	}
 	
 	@GetMapping("/usr/article/delete")
 	@ResponseBody
-	public String delete(int id) {
-		
-//		Article article = this.articleService.getArticleById(id);
-//		
-//		if (article == null) {
-//			return String.format("%d번 게시물은 존재하지 않습니다", id);
-//		}
+	public String delete(int id, int boardId) {
 		
 		this.articleService.deleteArticle(id);
 		
-		return String.format("%d번 게시물을 삭제했습니다", id);
+		return Util.jsReplace(String.format("%d번 게시글이 삭제되었습니다", id), String.format("list?boardId=%d", boardId));
+	}
+	
+	@PostMapping("/usr/article/list")
+	@ResponseBody
+	public void SearchKeyword(Model model, @RequestParam String searchType, @RequestParam String keyword) {
+		List<Article> articles = articleService.SearchKeyword(searchType, keyword);
+		model.addAttribute("articles", articles);
+		
 	}
 }
