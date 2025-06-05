@@ -29,21 +29,11 @@ public class UsrArticleController {
 		this.req = req;
 	}
 	
-	@GetMapping("/usr/article/interviewWrite")
-	public String interviewWrite() {
-		return "usr/article/interviewWrite";
+	@GetMapping("/usr/article/mainWrite")
+	public String mainWrite() {
+		return "usr/article/mainWrite"; // 글쓰기 유형 선택 페이지
 	}
 
-	@GetMapping("/usr/article/practiceWrite")
-	public String practiceWrite() {
-		return "usr/article/interviewWrite";
-	}
-	
-	@GetMapping("/usr/article/workingWrite")
-	public String workingWrite() {
-		return "usr/article/workingWrite";
-	}
-	
 	@PostMapping("/usr/article/doWrite")
 	@ResponseBody
 	public String doWrite(String title, String content, int boardId) {
@@ -55,8 +45,32 @@ public class UsrArticleController {
 		return Util.jsReplace("게시글 작성!", String.format("detail?id=%d", id));
 	}
 	
+	@GetMapping("/usr/article/interviewWrite")
+	public String interviewWrite() {
+		return "usr/article/interviewWrite";
+	}
 	
-	@GetMapping("/usr/article/List")
+	@GetMapping("/usr/article/practiceWrite")
+	public String practiceWrite() {
+		return "usr/article/practiceWrite";
+	}
+	
+	@GetMapping("/usr/article/workingWrite")
+	public String workingWrite() {
+		return "usr/article/workingWrite";
+	}
+	
+	/*
+	 * @GetMapping("/usr/article/selectWrite") public String selectWrite(String
+	 * type, int boardId) { switch (type) { case "interview": return
+	 * "redirect:/usr/article/interviewWrite?boardId=" + boardId; case "practice":
+	 * return "redirect:/usr/article/practiceWrite?boardId=" + boardId; case
+	 * "working": return "redirect:/usr/article/workingWrite?boardId=" + boardId;
+	 * default: return "redirect:/usr/article/mainWrite?boardId=" + boardId; } }
+	 */
+
+	
+	@GetMapping("/usr/article/list")
 	public String List(Model model, int boardId, @RequestParam(defaultValue = "1") int cPage) {
 		
 		int articlesInPage = 10;

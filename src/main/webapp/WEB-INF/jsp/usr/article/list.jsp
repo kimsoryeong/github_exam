@@ -28,7 +28,7 @@
 				</div>
 			</div>	
 			
-			<div class="table-box">
+			<div class="table-box ">
 				<table class="table">
 					<thead>
 						<tr>
@@ -51,7 +51,7 @@
 				</table>
 			</div>
 			
-			<c:if test="${req.getLoginedMember().getId() != 0 }">
+			<%-- <c:if test="${req.getLoginedMember().getId() != 0 }">
 				<c:choose>
 					<c:when test="${req.getLoginedMember().getAuthLevel() == 0 }">
 						<div class="bg-white px-6 pt-6">
@@ -62,6 +62,24 @@
 						<c:if test="${board.getId() != 1 }">
 							<div class="bg-white px-6 pt-6"">
 								<div class="text-right"><a class="btn btn-neutral btn-outline btn-xs" href="write">글쓰기</a></div>
+							</div>
+						</c:if>
+					</c:otherwise>
+				</c:choose>
+			</c:if> --%>
+			
+- 			<c:if test="${req.getLoginedMember().getId() != 0 }">
+				<c:choose>
+					<c:when test="${req.getLoginedMember().getAuthLevel() == 0 }">
+						<div class="bg-white px-6 pt-6">
+							<div class="text-right"><a class="btn btn-neutral btn-outline btn-xs" href="mainWrite?boardId=${board.getId()}">글쓰기</a>
+</div>
+						</div>
+					</c:when>
+					<c:otherwise>
+						<c:if test="${board.getId() != 1 }">
+							<div class="bg-white px-6 pt-6"">
+								<div class="text-right"><a class="btn btn-neutral btn-outline btn-xs" href="mainWrite?boardId=${board.getId()}">글쓰기</a></div>
 							</div>
 						</c:if>
 					</c:otherwise>
