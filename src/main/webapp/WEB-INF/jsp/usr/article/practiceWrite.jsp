@@ -5,7 +5,7 @@
 <c:set var="pageTitle" value="작성" />
 
 <%@ include file="/WEB-INF/jsp/common/header.jsp" %>
-
+	<div>실습 및 봉사활동 후기작성페이지!!!!</div>
 	<section class="mt-8">
 		<div class="container mx-auto">
 			<form action="doWrite" method="post">

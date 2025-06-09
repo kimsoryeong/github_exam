@@ -77,17 +77,32 @@
 								</form>
 							</div>
 						</div>
-						   <div class="p-4 border-b">
-						      <div class="flex justify-between items-center">
-							  </div>
-							  <c:forEach items="${articles }" var="article">
-							    <span class="hover:underline underline-offset-4 font-bold text-lg text-[#333]"><a href="detail?id=${article.getId() }">${article.getInstitutionName() }</a></span>
-							    <span class="text-yellow-500 font-bold">★ ${article.getStar() }</span>
-	    						<div class="text-sm text-gray-600 mt-3 mb-3">“${article.getContent() }”</div>
-							  </c:forEach>
+					<div class="border-4 border-blue-800 table">
+						<div class="">
+								<table class="table">
+									<thead>
+										<tr>
+											<th>번호</th>
+											<th>기관명</th>
+											<th>한 줄 평</th>
+											<th>작성일</th>
+										</tr>
+									</thead>
+									<tbody>
+										<c:forEach items="${articles }" var="article">
+											<tr class="hover:bg-base-300">
+												<td>${article.getId() }</td>
+												<td class="hover:underline underline-offset-4"><a href="detail?id=${article.getId() }">${article.getInstitutionName() }</a></td>
+												<td>${article.getContent() }</td>
+												<td>${article.getRegDate().substring(2, 16) }</td>
+											</tr>
+										</c:forEach>
+									</tbody>
+								</table>	
 							</div>
 						</div>
 					</div>
+				</div>
 			<div class="max-w-5xl mx-auto border-4 border-green-500">
  			<c:if test="${req.getLoginedMember().getId() != 0 }">
 				<c:choose>

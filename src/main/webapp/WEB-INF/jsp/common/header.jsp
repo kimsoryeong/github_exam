@@ -20,7 +20,7 @@
 </head>
 <body>
 
-	<div class="container mt-12 h-15 flex mx-auto text-l">
+	<div class="container mt-12 h-15 flex mx-auto max-w-5xl text-l">
 		<div><a class="flex h-full px-2 items-center text-orange-500 font-bold text-xl" href="/">KinderReview</a></div>
 		<ul class="flex">
 			<li class="hover:underline underline-offset-8"><a class="flex h-full px-3 items-center" href="/">홈</a></li>

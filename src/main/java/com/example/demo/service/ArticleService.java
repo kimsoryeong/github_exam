@@ -16,20 +16,21 @@ public class ArticleService {
 		this.articleDao = articleDao;
 	}
 
-	public void writeArticle(String title, String content, int loginedMemberId, int boardId) {
-		this.articleDao.writeArticle(title, content, loginedMemberId, boardId);
+	public void writeArticle(String institutionName, String content, int loginedMemberId, int boardId, int salaryScore, int welfareScore, int environmentScore, String salaryComment, String welfareComment, String environmentComment) {
+		this.articleDao.writeArticle(institutionName, content, loginedMemberId, boardId, salaryScore, welfareScore, environmentScore, salaryComment, welfareComment, environmentComment);
 	}
 
-	public List<Article> getArticles(int boardId, int articlesInPage, int limitFrom) {
-		return this.articleDao.getArticles(boardId, articlesInPage, limitFrom);
+	public List<Article> getArticles(int boardId, String city, String district, int articlesInPage, int limitFrom) {
+	    return articleDao.getArticlesWithRegion(boardId, city, district, articlesInPage, limitFrom);
 	}
+
 
 	public Article getArticleById(int id) {
 		return this.articleDao.getArticleById(id);
 	}
 
-	public void modifyArticle(int id, String title, String content) {
-		this.articleDao.modifyArticle(id, title, content);
+	public void modifyArticle(String institutionName, int id, String content) {
+		this.articleDao.modifyArticle(institutionName, id, content);
 	}
 
 	public void deleteArticle(int id) {
@@ -40,13 +41,14 @@ public class ArticleService {
 		return this.articleDao.getLastArticleId();
 	}
 
-	public int getArticlesCnt(int boardId) {
-		return this.articleDao.getArticlesCnt(boardId);
+	public int getArticlesCnt(int boardId, String city, String district) {
+	    return articleDao.getArticlesCntWithRegion(boardId, city, district);
 	}
 	
 	public List<Article> SearchKeyword(String searchType, String keyword) {
 		return articleDao.searchKeyword(searchType, keyword);
-		
-		
 	}
+	
+	
+
 }

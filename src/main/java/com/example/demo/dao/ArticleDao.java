@@ -5,6 +5,7 @@ import java.util.List;
 import org.apache.ibatis.annotations.Delete;
 import org.apache.ibatis.annotations.Insert;
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
 import org.apache.ibatis.annotations.Update;
 
@@ -18,11 +19,16 @@ public interface ArticleDao {
 			    SET regDate = NOW()
 			        , updateDate = NOW()
 			        , memberId = #{loginedMemberId}
+			        , institutionName = #{institutionName}
 			        , boardId = #{boardId}
-			        , title = #{title}
 			        , content = #{content}
+			        , salaryScore = #{salaryScore}
+			        , welfareScore = #{welfareScore}
+			        , environmentScore = #{environmentScore}
+			        , salaryComment = #{salaryComment}
+			        , welfareComment = #{environmentComment}
 			""")
-	public void writeArticle(String title, String content, int loginedMemberId, int boardId);
+	public void writeArticle(String institutionName, String content, int loginedMemberId, int boardId, int salaryScore, int welfareScore, int environmentScore, String salaryComment, String welfareComment, String environmentComment);
 
 	@Select("""
 			SELECT a.*, m.loginId AS writerName
@@ -48,8 +54,8 @@ public interface ArticleDao {
 			<script>
 			UPDATE article
 			    SET updateDate = NOW()
-			    	<if test="title != null and title != ''">
-			        	, title = #{title}
+			        <if test="institutionName != null and institutionName != ''">
+			        	, institutionName = #{institutionName}
 			        </if>
 			        <if test="content != null and content != ''">
 			        	, content = #{content}
@@ -57,7 +63,7 @@ public interface ArticleDao {
 			    WHERE id = #{id}
 		    </script>
 			""")
-	public void modifyArticle(int id, String title, String content);
+	public void modifyArticle(String institutionName, int id, String content);
 
 	@Delete("""
 			DELETE FROM article
@@ -71,13 +77,16 @@ public interface ArticleDao {
 	public int getLastArticleId();
 
 	@Select("""
-			SELECT COUNT(id)
-				FROM article
-				WHERE boardId = #{boardId}
-			""")
-	public int getArticlesCnt(int boardId);
+		    SELECT COUNT(id)
+		    FROM article
+		    WHERE boardId = #{boardId}
+		    AND (#{city} IS NULL OR city = #{city})
+		    AND (#{district} IS NULL OR district = #{district})
+		""")
+		int getArticlesCntWithRegion(@Param("boardId") int boardId,
+		                             @Param("city") String city,
+		                             @Param("district") String district);
 
-	
 	@Select("""
 			SELECT a.title, a.content
 		    FROM article AS a
@@ -88,7 +97,30 @@ public interface ArticleDao {
 			""")
 	List<Article> searchKeyword(String searchType, String keyword);
 
-	
+	@Select("""
+		    <script>
+		        SELECT a.*, m.loginId AS writerName
+		        FROM article a
+		        INNER JOIN `member` m ON a.memberId = m.id
+		        WHERE a.boardId = #{boardId}
+		        <if test="city != null and city != ''">
+		            AND a.city = #{city}
+		        </if>
+		        <if test="district != null and district != ''">
+		            AND a.district = #{district}
+		        </if>
+		        ORDER BY a.id DESC
+		        LIMIT #{limitFrom}, #{articlesInPage}
+		    </script>
+		""")
+		List<Article> getArticlesWithRegion(
+		    @Param("boardId") int boardId,
+		    @Param("city") String city,
+		    @Param("district") String district,
+		    @Param("articlesInPage") int articlesInPage,
+		    @Param("limitFrom") int limitFrom
+		);
+
 	
 
 }

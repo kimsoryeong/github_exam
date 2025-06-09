@@ -36,13 +36,29 @@ public class UsrArticleController {
 
 	@PostMapping("/usr/article/doWrite")
 	@ResponseBody
-	public String doWrite(String title, String content, int boardId) {
+	public String doWrite(@RequestParam String institutionName,
+            @RequestParam String content,
+            @RequestParam int boardId,
+            @RequestParam Integer salaryScore,
+            @RequestParam Integer welfareScore,
+            @RequestParam Integer environmentScore,
+            @RequestParam(required = false) String salaryComment,
+            @RequestParam(required = false) String welfareComment,
+            @RequestParam(required = false) String environmentComment) {
 		
-		this.articleService.writeArticle(title, content, this.req.getLoginedMember().getId(), boardId);
+		if (environmentScore == null) {
+	        return Util.jsBack("근무환경 별점을 선택해 주세요.");
+	    }
 		
-		int id = this.articleService.getLastArticleId();
-		
-		return Util.jsReplace("게시글 작성!", String.format("detail?id=%d", id));
+		int memberId = this.req.getLoginedMember().getId(); // 익명 처리 시 이 부분 조정 가능
+
+	    this.articleService.writeArticle(institutionName, content, memberId, boardId,
+	                                      salaryScore, welfareScore, environmentScore,
+	                                      salaryComment, welfareComment, environmentComment);
+
+	    int id = this.articleService.getLastArticleId();
+
+	    return Util.jsReplace("게시글 작성!", String.format("detail?id=%d", id));
 	}
 	
 	@GetMapping("/usr/article/interviewWrite")
@@ -60,46 +76,46 @@ public class UsrArticleController {
 		return "usr/article/workingWrite";
 	}
 	
-	/*
-	 * @GetMapping("/usr/article/selectWrite") public String selectWrite(String
-	 * type, int boardId) { switch (type) { case "interview": return
-	 * "redirect:/usr/article/interviewWrite?boardId=" + boardId; case "practice":
-	 * return "redirect:/usr/article/practiceWrite?boardId=" + boardId; case
-	 * "working": return "redirect:/usr/article/workingWrite?boardId=" + boardId;
-	 * default: return "redirect:/usr/article/mainWrite?boardId=" + boardId; } }
-	 */
-
 	
 	@GetMapping("/usr/article/list")
-	public String List(Model model, int boardId, @RequestParam(defaultValue = "1") int cPage) {
-		
-		int articlesInPage = 10;
-		int limitFrom = (cPage - 1) * articlesInPage;
-		
-		int articlesCnt = this.articleService.getArticlesCnt(boardId);
-		
-		int totalPagesCnt = (int) Math.ceil(articlesCnt / (double) articlesInPage);
-	
-		int begin = ((cPage - 1) / 10) * 10 + 1;
-		int end = (((cPage - 1) / 10) + 1) * 10;
-		
-		if (end > totalPagesCnt) {
-			end = totalPagesCnt;
-		}
-		
-		Board board = this.boardService.getBoard(boardId);
-		List<Article> articles = this.articleService.getArticles(boardId, articlesInPage, limitFrom);
-		
-		model.addAttribute("cPage", cPage);
-		model.addAttribute("begin", begin);
-		model.addAttribute("end", end);
-		model.addAttribute("totalPagesCnt", totalPagesCnt);
-		model.addAttribute("articlesCnt", articlesCnt);
-		model.addAttribute("articles", articles);
-		model.addAttribute("board", board);
-		
-		return "usr/article/list";
+	public String list(Model model,
+	                   @RequestParam(required = false) Integer boardId,
+	                   @RequestParam(defaultValue = "1") int cPage,
+	                   @RequestParam(required = false) String city,
+	                   @RequestParam(required = false) String district) {
+
+	    if (boardId == null) {
+	        return Util.jsBack("게시판 ID가 필요합니다.");
+	    }
+
+	    int articlesInPage = 10;
+	    int limitFrom = (cPage - 1) * articlesInPage;
+
+	    int articlesCnt = articleService.getArticlesCnt(boardId, city, district);
+	    int totalPagesCnt = (int) Math.ceil(articlesCnt / (double) articlesInPage);
+
+	    int begin = ((cPage - 1) / 10) * 10 + 1;
+	    int end = (((cPage - 1) / 10) + 1) * 10;
+	    if (end > totalPagesCnt) end = totalPagesCnt;
+
+	    List<Article> articles = articleService.getArticles(boardId, city, district, articlesInPage, limitFrom);
+	    Board board = boardService.getBoard(boardId);
+
+	    model.addAttribute("board", board);
+	    model.addAttribute("cPage", cPage);
+	    model.addAttribute("begin", begin);
+	    model.addAttribute("end", end);
+	    model.addAttribute("totalPagesCnt", totalPagesCnt);
+	    model.addAttribute("articlesCnt", articlesCnt);
+	    model.addAttribute("articles", articles);
+	    model.addAttribute("city", city);
+	    model.addAttribute("district", district);
+
+	    return "usr/article/list";
 	}
+
+
+
 	
 	@GetMapping("/usr/article/detail")
 	public Object detail(Model model, int id) {
@@ -123,9 +139,9 @@ public class UsrArticleController {
 	
 	@PostMapping("/usr/article/doModify")
 	@ResponseBody
-	public String doModify(int id, String title, String content) {
+	public String doModify(String institutionName, int id, String content) {
 		
-		this.articleService.modifyArticle(id, title, content);
+		this.articleService.modifyArticle(institutionName, id, content);
 		
 		return Util.jsReplace(String.format("%d번 게시물을 수정했습니다", id), String.format("detail?id=%d", id));
 	}

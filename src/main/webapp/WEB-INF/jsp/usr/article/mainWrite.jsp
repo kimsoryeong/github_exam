@@ -23,23 +23,25 @@
 
 <%-- <%@ include file="/WEB-INF/jsp/common/header.jsp" %> --%>
 
-	<section class="mt-4 mx-auto container ">
+	<section class="mt-4 mx-auto container">
 		<div class=" icon-box flex justify-end h-20 items-center">
 			<i class="fa-solid fa-house fa-2xl"></i>
 			&nbsp;&nbsp;&nbsp;&nbsp;
 			<i class="fa-regular fa-user fa-2xl"></i>
 		</div>			  
-		<div class="container flex justify-center  ">
-			<form action="doWrite" method="post">
-				<div class="text-center w-200 mt-5">
+		<div class="container">
+			<form id="reviewForm" onsubmit="return false;">
+			<div class="rounded-2xl mx-auto text-center w-full max-w-2xl px-4">
+				<div class=" mt-5">
 				<span class="px-2 items-center text-orange-500 font-bold text-3xl"><a href="/">KinderReview</a></span>
 				<span class="px-2 items-center font-bold text-2xl">기관 리뷰 작성</span>
 				</div>
 				<br></br>
+				
 				<div class="">
 					<div class="pr-10 pl-10 pt-4 pb-4">
-						<div class="font-bold pb-4">근무유형</div>
-					    <select style ="height:40px; border-radius: 5px; width: 100%;  " class="select" name="work-type-select">
+						<div class="font-bold pb-4 ">근무유형</div>
+					    <select style ="height:40px; border-radius: 5px; width: 70%;  " class="select " name="work-type-select">
 						   <option class ="text-center h-40 " value="" disabled selected >근무유형을 선택해주세요</option>
 					       <option>담임교사</option>
 					       <option>부담임, 보조 및 연장반 교사</option>
@@ -48,9 +50,9 @@
 					       <option>기타종사자</option>
 					     </select>
 					</div>
-					<div class="pr-10 pl-10 pt-4 pb-4">
+					<div class="pr-10 pl-10 pt-4 pb-4 ">
 					 <div class="font-bold pb-4">근무지역</div>
-					 <select id="city" onchange="updateDistricts()" style ="height:40px; width: 50%; border-radius: 5px;"class="select" name="city-select">
+					 <select id="city" onchange="updateDistricts()" style ="height:40px; width: 35%; border-radius: 5px;"class="select" name="city-select">
 					    <option class ="text-center h-40" value="" disabled selected>-- 시/도 선택 --</option>
 					    <option value="서울">서울</option>
 					    <option value="대전">대전</option>
@@ -70,21 +72,22 @@
 					    <option value="충남">충남</option>
 					    <option value="충북">충북</option>
 					  	</select>	
-					  <select id="district" style ="height:40px; border-radius: 5px; width: 49%;" class="select" name="district-select">
+					  <select id="district" style ="height:40px; border-radius: 5px; width: 34%;" class="select" name="district-select">
 					    <option class ="text-center h-40" value="" disabled selected>-- 구/군 선택 --</option>
 					  	</select>
 					</div>
-				 <div class="option pr-10 pl-10 pt-4 pb-4">
+				 <div class="option pr-10 pl-10 pt-4 pb-4 ">
 					 <div class="font-bold pb-4">기관유형</div>
-				     <select style ="height:40px; border-radius: 5px; width: 100%; " name="insitution-type-select" class="select">
+				     <select style ="height:40px; border-radius: 5px; width: 70%; " name="insitution-type-select" class="select">
 					   <option class ="text-center h-40" value="" disabled selected>기관유형을 선택해주세요</option>
 				       <option>유치원</option>
 				       <option>어린이집</option>
 				     </select>
 				 </div>	
+				 <div class="text-center">
 					<div class="text-center font-bold pt-4">후기유형</div>
 					<br />
-						<div class="text-center">
+						<div >
 						<label>
 							<input class="radio radio-neutral radio-xs" name="boardId" type="radio" value="1" />
 							근무 후기
@@ -100,11 +103,15 @@
 							실습 및 봉사 후기
 						</label>
 						</div>
+					</div>
+				</div> 
 				<div class="text-center p-10">
-				  <button class="btn-wide btn-m text-black bg-[#ffbf73] border-none hover:bg-[#f79614df] hover:border-[#ff9d23]"
-				          style="width:150px; height:40px; border-radius: 5px;">
-				    다음
-				  </button>
+				  <button type="button"
+					        class="btn-wide btn-m text-black bg-[#ffbf73] border-none hover:bg-[#f79614df] hover:border-[#ff9d23]"
+					        style="width:150px; height:40px; border-radius: 5px;"
+					        onclick="goToWritePage()">
+					  다음
+					</button>
 				</div>
 				</div>
 			</form>
@@ -116,6 +123,56 @@
 
 
 	<script>
+		  function goToWritePage() {
+
+	    	  const workType = document.querySelector('select[name="work-type-select"]').value;
+	    	  if (!workType) {
+	    	    alert("근무유형을 선택해주세요.");
+	    	    return;
+	    	  }
+
+	    	  const city = document.querySelector('select[name="city-select"]').value;
+	    	  if (!city) {
+	    	    alert("근무지역(시/도)을 선택해주세요.");
+	    	    return;
+	    	  }
+
+	    	  const district = document.querySelector('select[name="district-select"]').value;
+	    	  if (!district) {
+	    	    alert("근무지역(구/군)을 선택해주세요.");
+	    	    return;
+	    	  }
+
+	    	  const institutionType = document.querySelector('select[name="insitution-type-select"]').value;
+	    	  if (!institutionType) {
+	    	    alert("기관유형을 선택해주세요.");
+	    	    return;
+	    	  }
+			
+	    	  const selectedReviewType = document.querySelector('input[name="boardId"]:checked');
+	    	  if (!selectedReviewType) {
+	    	    alert("후기 유형을 선택해주세요.");
+	    	    return;
+	    	  }
+	    	  
+	    	  const boardId = selectedReviewType.value;
+	    	  let url = "";
+
+	    	  switch (boardId) {
+	    	    case "1":
+	    	      url = "/usr/article/workingWrite";
+	    	      break;
+	    	    case "2":
+	    	      url = "/usr/article/interviewWrite";
+	    	      break;
+	    	    case "3":
+	    	      url = "/usr/article/practiceWrite";
+	    	      break;
+	    	  }
+
+	    	  location.href = url;
+	    	}
+
 	    const districtsByCity = {
 	      "서울": ["강남구", "서초구", "송파구", "강북구", "강동구"],
 	      "대전": ["서구", "중구", "동구", "대덕구", "유성구"],
