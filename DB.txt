@@ -14,20 +14,40 @@ CREATE TABLE `member`(
 );
 
 
-CREATE TABLE article(
-    id INT UNSIGNED PRIMARY KEY AUTO_INCREMENT
-    , regDate DATETIME NOT NULL
-    , updateDate DATETIME NOT NULL
-    , title VARCHAR(50) NOT NULL
-    , content TEXT NOT NULL
-    , nickname VARCHAR(50) NOT NULL
-);
-ALTER TABLE article ADD COLUMN memberId INT UNSIGNED NOT NULL AFTER updateDate;
-ALTER TABLE article ADD COLUMN boardId INT UNSIGNED NOT NULL AFTER memberId;
-ALTER TABLE article ADD COLUMN views INT UNSIGNED NOT NULL DEFAULT 0;
-ALTER TABLE article ADD COLUMN city VARCHAR(100);
-ALTER TABLE article ADD COLUMN district VARCHAR(100);
 
+DROP TABLE IF EXISTS article_option;
+DROP TABLE IF EXISTS article;
+DELETE FROM article WHERE welfareScore =3;
+
+CREATE TABLE article(
+    id INT UNSIGNED PRIMARY KEY AUTO_INCREMENT,
+    regDate DATETIME NOT NULL,
+    updateDate DATETIME NOT NULL,
+    memberId INT UNSIGNED NOT NULL,
+    boardId INT UNSIGNED NOT NULL,
+    institutionName VARCHAR(255),
+    content TEXT NOT NULL,
+    salaryScore INT DEFAULT 0,
+    welfareScore INT DEFAULT 0,
+    environmentScore INT DEFAULT 0,
+    salaryComment TEXT,
+    welfareComment TEXT,
+    environmentComment TEXT,
+    workType VARCHAR(100),
+    city VARCHAR(100),
+    district VARCHAR(100),
+    institutionType VARCHAR(100)
+);
+ALTER TABLE article ADD COLUMN commuteTimeComment TEXT AFTER environmentComment;
+ALTER TABLE article DROP COLUMN district;
+
+CREATE TABLE article_option (
+    id INT UNSIGNED PRIMARY KEY AUTO_INCREMENT,
+    articleId INT UNSIGNED NOT NULL,
+    TYPE VARCHAR(20) NOT NULL, -- 'salary', 'welfare', 'environment'
+    VALUE VARCHAR(100) NOT NULL,
+    FOREIGN KEY (articleId) REFERENCES article(id) ON DELETE CASCADE
+);
 
 
 CREATE TABLE board(
@@ -35,12 +55,13 @@ CREATE TABLE board(
     , `name` VARCHAR(50) NOT NULL
 );
 
+
 SELECT * FROM board;
 SELECT * FROM article;
 SELECT * FROM `member`;
 SELECT * FROM likePoint;
 SELECT * FROM reply;
-
+SELECT * FROM article_option;
 
 INSERT INTO board
     SET `name` = '기관 정보';
@@ -71,9 +92,19 @@ INSERT INTO article
         , updateDate = NOW()
         , memberId = 1
         , boardId = 2
-        , title = '근무후기1'
-        , content = '근무후기1'
-        , nickname = '유저1';
+        , institutionName = '기관명 예시'
+        , content = '기관명 한줄평'
+        , city = '서울'
+        , workType = '담임교사'
+        , institutionType = '어린이집'
+        , salaryScore = 4
+        , welfareScore = 3
+        , environmentScore = 5
+        , salaryComment = '급여 만족'
+        , welfareComment = '복지 괜찮음'
+        , environmentComment = '환경 좋아요'
+        , commuteTimeComment = '8:00~ 19:00';
+
         
         
 INSERT INTO `member`
