@@ -6,8 +6,8 @@
 
 <%@ include file="/WEB-INF/jsp/common/header.jsp" %>
 
-	<section class="mt-8">
-		<div class="container mx-auto">
+	<section class="mt-4 mx-auto container">
+		<div class=" mx-auto ">
 			<!-- <span>유아교육기관 찾기</span>
 			<input type="text" name="keyword" id="keyword">
 			<button class="btn btn-neutral btn-outline btn-sm" type="submit"><i class="fa-solid fa-magnifying-glass"></i></button> -->
@@ -27,7 +27,7 @@
 			  <input type="search" class="grow" placeholder="주변 유아교육기관 찾기" />
 			</label>
 		</div>
-	</section>
+	</section> 
 
 
 	

@@ -27,7 +27,7 @@
 		}
 	</script>
 
-	<section class="mt-8">
+	<section class="mt-8 container mx-auto max-w-5xl text-center border-2 border-red-500">
 		<div class="container mx-auto">
 			<form action="doLogin" method="post" onsubmit="return loginFormChk(this);">
 				<div class="table-box">
