@@ -22,42 +22,36 @@
 
 <%-- <%@ include file="/WEB-INF/jsp/common/header.jsp" %> --%>
 
-<section class="mt-4 mx-auto container w-min">
-	<div class="w-50% flex justify-between items-center h-15 px-4">
-	  <span class="text-orange-500 font-bold text-3xl">
-	    <a href="/">KinderReview</a>
-	  </span>
-	  <span class="flex items-center space-x-6 text-black">
-	    <i class="fa-solid fa-house fa-2xl"></i>
-	    <i class="fa-regular fa-user fa-2xl"></i>
-	  </span>
-	</div>
-	  <div class="container w-min flex justify-center">
-	    <form action="doWrite" method="post">
-	      <input type="hidden" name="workType" value="${param.workType}" />
-		  <input type="hidden" name="city" value="${param.city}" />
-		  <input type="hidden" name="institutionType" value="${param.institutionType}" />
-	      <input type="hidden" name="boardId" value="4" />
-	      <div class="w-200 text-center border-2 border-[#ffbf73] mt-5">
-	        <span class=" border-2 border-[#ffbf73] font-bold text-2xl">근무 리뷰 작성</span>
-	      </div>
-	
-	      <div class=" rounded-2xl mx-auto w-full max-w-2xl p-5 border-2 border-red-500">
-	        <div class="pr-10 pl-10 pt-4 pb-4 border-2 border-[#ffbf73] ">
-	          <span class="font-bold pr-4 text-xl">기관명</span>
-	          <span><input class="input input-neutral" name="institutionName" type="text" required /></span>
-	        </div>
-			<div>
-				<!-- <div>
-					<form action="upload" method="post" enctype="maltipart/">
-					
-					</form>
-				</div> -->
+<section class="flex items-center justify-center bg-gray-100 h-screen">
+	  <div class="bg-white mx-30 min-w-max shadow-xl rounded-xl h-full-60%">
+	  	<div class="flex justify-end pr-5 pt-2  items-center h-15">
+			<a href="/"><i class="text-orange-300 hover:text-orange-400 fa-solid fa-house fa-2xl"></i></a>
+		</div>
+		<div>
+		    <form action="doWrite" method="post">
+		      <input type="hidden" name="workType" value="${param.workType}" />
+			  <input type="hidden" name="city" value="${param.city}" />
+			  <input type="hidden" name="institutionType" value="${param.institutionType}" />
+		      <input type="hidden" name="boardId" value="4" />
+	     	<div class="mx-auto text-center w-full max-w-2xl px-4 px-30">
+				<span class="px-2 items-center text-orange-500 font-bold text-3xl"><a href="/">KinderReview</a></span>
+				<span class="px-2 items-center font-bold text-2xl">근무 리뷰 작성</span>
 			</div>
-	        <div class="pr-10 pl-10 pt-2 pb-4">
-	          <div class="font-bold text-xl">기관 총 평점</div>
+			
+	      <div class="rounded-2xl p-5">
+	        <input type="hidden" name="workingReview" id="hiddenWorkingReview" />
+				<input type="hidden" name="interviewReview" id="hiddenInterviewReview" />
+				<input type="hidden" name="practiceReview" id="hiddenPracticeReviewType" />
+				
+	        <div class="px-10 mx-10 pt-8 py-5">
+	          <span class="font-bold pr-4 text-lg text-orange-400"><i class="fa-solid fa-school pr-5"></i>기관명</span>
+	          <span><input style="width:70%;" class="input input-neutral" name="institutionName" type="text" required /></span>
+	        </div>
+			
+	        <div class="px-10 mx-10 py-2">
+	          <div class="font-bold text-lg text-orange-400"><i class="fa-regular fa-star-half-stroke pr-5"></i>기관 총 평점</div>
 	          <div>
-	            <div class="review-form">
+	            <div class="review-form pt-1">
 	              <div class="star">
 	                <a href="#" class="on">★</a><a href="#" class="on">★</a><a href="#" class="on">★</a><a href="#" class="on">★</a><a href="#" class="on">★</a>
 	                <input type="hidden" name="salaryScore" value="5" />
@@ -66,16 +60,17 @@
 	          </div>
 	        </div>
 	
-	        <div class="option pr-10 pl-10 pb-4">
-	          <div class="font-bold text-xl">기관 한 줄 평</div>
-	           <div class="pt-3 pb-4 text-sm">작성하실 리뷰의 제목을 입력해 주세요.</div>
+	        <div class="px-10 mx-10 py-4 option">
+	          <div class="font-bold text-lg text-orange-400"><i class="fa-regular fa-pen-to-square pr-5"></i>기관 한 줄 평</div>
+	           <div class="pt-3 pb-4 text-sm">작성하실 리뷰의 제목을 입력해 주세요. (20자 이내)</div>
 	          <div>
-	            <input type="text" name="content" id="contentField" placeholder="15자 이상 기관에 대해 작성해주세요. (필수입력)" style="width:100%;" class="input input-neutral" />
+	            <textarea name="institutionComment" placeholder="10자 이상 기관에 대해 작성해주세요. (필수입력)" 
+	              		rows="5" cols="20" wrap="soft" maxlength="20" style="width:100%; height: 70px; overflow-y: auto; overflow-x:hidden; resize: none; word-break: break-word; white-space: pre-wrap;" class="input"></textarea>
 	          </div>
 	        </div>
 	
-	        <div class="pl-10 pr-10 pb-4">
-	         <div class="font-bold text-xl">기관의 특징</div>
+	        <div class="px-10 mx-10 py-4">
+	         <div class="font-bold text-lg text-orange-400"><i class="fa-regular fa-square-check pr-5"></i>기관의 특징</div>
 	           <div class="pt-2 pb-2 text-sm">아래 버튼을 클릭하여 작성해주세요</div>
 		         <div class="">
 		         <div class="flex gap-4 font-bold cursor-pointer mt-2">
@@ -86,10 +81,9 @@
 		      	</div>
 	        </div>
 	
-	        <!-- 급여 영역 -->
-	        <div id="salary-section" class="tab-content mt-4 hidden pl-10 pr-10">
-	          <div class="shadow-md rounded-lg p-4 mb-6 bg-yellow-50 pt-4 pb-4">
-	            <span class=" text-lg font-bold">급여</span>
+	        <div id="salary-section" class="tab-content  mt-4 hidden pl-10 pr-10">
+	          <div class="shadow-md rounded-lg py-5 px-10 mx-7 bg-yellow-50">
+	            <span class=" font-bold"><i class="fa-solid fa-sack-dollar pr-5 "></i>급여</span>
 	            <div class="">
 	            <div class="review-form">
 	              <div class="star">
@@ -106,15 +100,15 @@
 	              <label><input class="checkbox-xs" name="salaryOptions" type="checkbox" value="식비" /> 식비</label>
 	            </div>
 	            <div class="pt-4">
-	              <input type="text" name="salaryComment" placeholder="급여 관련 하고싶은 말을 작성해 주세요." style="width:100%;" class="input input-neutral" />
+	              <textarea name="salaryComment" placeholder="급여 관련 하고싶은 말을 작성해 주세요." 
+	              			rows="5" cols="20" wrap="soft" style="width:100%; height: 70px; overflow-y: auto; overflow-x:hidden; resize: none; word-break: break-word; white-space: pre-wrap;" class="input"></textarea>
 	            </div>
 	          </div>
 	        </div>
 	
-	        <!-- 복지 영역 -->
-	        <div id="welfare-section" class="tab-content mt-4 hidden pl-10 pr-10">
-	          <div class="shadow-md rounded-lg p-4 mb-6 bg-green-50 pt-4 pb-4">
-	            <span class="text-lg font-bold">복지</span>
+	        <div id="welfare-section" class="tab-content  mt-4 hidden pl-10 pr-10">
+	          <div class="shadow-md rounded-lg py-5 px-10 mx-7 bg-green-50">
+	            <span class="font-bold"><i class="fa-solid fa-hand-holding-heart pr-5"></i>복지</span>
 	            <div class="">
 	            <div class="review-form">
 	              <div class="star">
@@ -132,15 +126,15 @@
 	              <label><input class="checkbox-xs" name="welfareOptions" type="checkbox" value="휴게시간" /> 휴게시간</label>
 	            </div>
 	            <div class="pt-4">
-	              <input type="text" name="welfareComment" placeholder="복지 관련 하고싶은 말을 작성해 주세요." style="width:100%;" class="input input-neutral" />
+	              <textarea name="welfareComment" placeholder="복지 관련 하고싶은 말을 작성해 주세요." 
+	              			rows="5" cols="20" wrap="soft" style="width:100%; height: 70px; overflow-y: auto; overflow-x:hidden; resize: none; word-break: break-word; white-space: pre-wrap;" class="input"></textarea>
 	            </div>
 	          </div>
 	        </div>
 	
-	        <!-- 근무환경 영역 -->
 	        <div id="work-section" class="tab-content mt-4 hidden pl-10 pr-10">
-	          <div class="shadow-md rounded-lg p-4 mb-6 bg-blue-50 pt-4 pb-4"">
-	            <span class="text-lg font-bold ">근무환경</span>
+	          <div class="shadow-md rounded-lg py-5 px-10 mx-7 bg-blue-50">
+	            <span class="font-bold "><i class="fa-solid fa-seedling pr-5"></i>근무환경</span>
 		           <div class="">
 		            <div class="review-form ">
 		              <div class="star">
@@ -151,15 +145,17 @@
 		          </div>
 	            <div class="pt-4">
 	            <div class="font-bold pb-2 text-m">출퇴근 시간</div>
-	              <input type="text" name="commuteTimeComment" id="CommuteTime" placeholder="기관의 출퇴근 시간을 작성해주세요." style="width:100%;" class="input input-neutral" />
+	              <textarea name="commuteTimeComment" placeholder="기관의 출퇴근 시간을 작성해주세요. (필수입력)" 
+	              			rows="5" cols="20" wrap="soft" style="width:100%; height: 70px; overflow-y: auto; overflow-x:hidden; resize: none; word-break: break-word; white-space: pre-wrap;" class="input"></textarea>
 	            <div class="font-bold pt-2 pb-2 text-m">기타</div>
-	            <div class="text-xs pb-2">기관 내 분위기, 행사 빈도수, 특성화 활동, 원내 문화, 평가제, 교사 대 아동 비율 등&nbsp; 자유롭게 작성해주세요.</div>	
-	              <input type="text" name="environmentComment" id="environment" placeholder="기관의 근무환경에 대해 자유롭게 작성해주세요." style="width:100%;" class="input input-neutral" />
+	            <div class="text-xs pb-2">기관 내 분위기, 원내 문화, 평가제, 교사 대 아동 비율 등 자유롭게 작성해주세요.</div>	
+	              <textarea name="environmentComment" placeholder="기관의 근무환경에 대해 자유롭게 작성해주세요." 
+	              			rows="5" cols="20" wrap="soft" style="width:100%; height: 70px; overflow-y: auto; overflow-x:hidden; resize: none; word-break: break-word; white-space: pre-wrap;" class="input"></textarea>
 	            </div>
 	          </div>
 	        </div>
 	
-	        <div class="pt-2 text-center">
+	        <div class="py-6 text-center">
 	          <button type="submit" onclick="combineContent()" class="btn-wide btn-m text-black bg-[#ffbf73] border-none hover:bg-[#f79614df] hover:border-[#ff9d23]" style="width:150px; height:40px; border-radius: 5px;">
 	            작성
 	          </button>
@@ -167,8 +163,8 @@
 	      </div>
 	    </form>
 	  </div>
-	
-	  <div class="bg-white p-4 text-center flex justify-end">
+	</div>
+	  <div class="bg-white p-4 text-center flex">
 	    <div>
 	      <button class="btn btn-outline btn-s" onclick="history.back();" style="border-radius: 5px;">뒤로가기</button>
 	    </div>
@@ -207,6 +203,36 @@
 	    });
 	  });
 	  
+	  $(function() {
+	        $('.input')
+	            .css({
+	                'border-color': 'black',
+	                'border-width': '1px',
+	                'border-style': 'solid'
+	            })
+	            .on('focus', function () {
+	                $(this).css({
+	                    'border-color': 'orange',
+	                    'border-width': '2px',
+	                    'border-style': 'solid'
+	                });
+	            })
+	            .on('blur', function () {
+	                $(this).css({
+	                    'border-color': 'black',
+	                });
+	            });
+	    });
+	  
+	  function combineContent() {
+		    const institutionName = document.querySelector('select[name="work-type-select"]').value;
+		    const institutionScore = document.querySelector('select[name="city-select"]').value;
+		    const institutionComment = document.querySelector('select[name="institution-type-select"]').value;
+
+		    if (!institutionName) { alert("기관명을 작성해주세요."); return; }
+		    if (!institutionScore) { alert("기관 총 평점을 선택해주세요."); return; }
+		    if (!institutionComment) { alert("기관 한 줄 평을 작성해주세요."); return; }
+
 	  
 	</script>
 	

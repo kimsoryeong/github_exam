@@ -42,7 +42,7 @@ public class UsrArticleController {
 	@ResponseBody
 	public String doWrite(
 	    @RequestParam String institutionName,
-	    @RequestParam String content,
+	    @RequestParam String institutionComment,
 	    @RequestParam int boardId,
 	    @RequestParam Integer salaryScore,
 	    @RequestParam Integer welfareScore,
@@ -73,7 +73,7 @@ public class UsrArticleController {
 
 	    // 한 번만 호출
 	    int articleId = this.articleService.writeArticle(
-	            institutionName, content, memberId, boardId,
+	            institutionName, institutionComment, memberId, boardId,
 	            salaryScore, welfareScore, environmentScore,
 	            salaryComment, welfareComment, environmentComment, commuteTimeComment,
 	            salaryOptions, welfareOptions, environmentOptions,
@@ -180,9 +180,9 @@ public class UsrArticleController {
 	
 	@PostMapping("/usr/article/doModify")
 	@ResponseBody
-	public String doModify(String institutionName, int id, String content) {
+	public String doModify(String institutionName, int id, String institutionComment) {
 		
-		this.articleService.modifyArticle(institutionName, id, content);
+		this.articleService.modifyArticle(institutionName, id, institutionComment);
 		
 		return Util.jsReplace(String.format("%d번 게시물을 수정했습니다", id), String.format("detail?id=%d", id));
 	}

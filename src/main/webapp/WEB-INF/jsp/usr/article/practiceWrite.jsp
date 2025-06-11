@@ -43,7 +43,7 @@
 						</tr>
 						<tr>
 							<th>내용</th>
-							<td><textarea class="textarea textarea-neutral" name="content"></textarea></td>
+							<td><textarea class="textarea textarea-neutral" name="institutionComment"></textarea></td>
 						</tr>
 						<tr>
 							<td colspan="2"><button class="btn btn-neutral btn-outline btn-sm btn-wide">저장</button></td>

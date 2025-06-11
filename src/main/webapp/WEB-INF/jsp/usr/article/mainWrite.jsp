@@ -22,28 +22,25 @@
 </head>
 
 <%-- <%@ include file="/WEB-INF/jsp/common/header.jsp" %> --%>
-
-	<section class="mt-4 mx-auto container">
-		<div class=" icon-box flex justify-end h-20 items-center">
-			<i class="fa-solid fa-house fa-2xl"></i>
-			&nbsp;&nbsp;&nbsp;&nbsp;
-			<i class="fa-regular fa-user fa-2xl"></i>
-		</div>			  
-		<div class="container">
+	<section class="flex items-center justify-center bg-gray-100 h-screen">
+		<div class="bg-white mb-30 min-w-max shadow-xl rounded-xl h-fit">
+		<div class="flex justify-end pr-5 pt-2 text-orange-300 hover:text-orange-400 items-center h-15">
+			<a href="/usr/article/list?boardId=2"><i class="fa-solid fa-arrow-right-from-bracket fa-2xl"></i></a>
+		</div>
 			<form id="reviewForm" onsubmit="return false;">
-			<div class="rounded-2xl mx-auto text-center w-full max-w-2xl px-4">
-				<div class=" mt-5">
+			<div class=" rounded-2xl mx-auto text-center w-full max-w-2xl px-4">
+				<div class="">
 				<span class="px-2 items-center text-orange-500 font-bold text-3xl"><a href="/">KinderReview</a></span>
 				<span class="px-2 items-center font-bold text-2xl">기관 리뷰 작성</span>
 				</div>
-				<br></br>
+			<div class="px-15 pt-5 pb-10">
 				<input type="hidden" name="workType" id="hiddenWorkType" />
-	<input type="hidden" name="city" id="hiddenCity" />
-	<input type="hidden" name="institutionType" id="hiddenInstitutionType" />
-				<div class="">
-					<div class="pr-10 pl-10 pt-4 pb-4">
-						<div class="font-bold pb-4 ">근무유형</div>
-					    <select id="workType" style ="height:40px; border-radius: 5px; width: 70%;  " class="select " name="work-type-select">
+				<input type="hidden" name="city" id="hiddenCity" />
+				<input type="hidden" name="institutionType" id="hiddenInstitutionType" />
+				<div class="px-5 ">
+					<div class="p-5">
+						<div class="font-bold pb-4 text-lg text-orange-400"><i class="fa-regular fa-user pr-5"></i>근무유형</div>
+					    <select style="width:400px;" id="workType" class="select h-10 rounded-md" name="work-type-select">
 						   <option class ="text-center h-40 " value="" disabled selected >근무유형을 선택해주세요</option>
 					       <option value="담임교사">담임교사</option>
 					       <option value="부담임, 보조 및 연장반 교사">부담임, 보조 및 연장반 교사</option>
@@ -52,9 +49,9 @@
 					       <option value="기타종사자">기타종사자</option>
 					     </select>
 					</div>
-					<div class="pr-10 pl-10 pt-4 pb-4 ">
-					 <div class="font-bold pb-4">근무지역</div>
-					 <select id="city" onchange="updateDistricts()" style ="height:40px; width: 35%; border-radius: 5px;"class="select" name="city-select">
+					<div class="p-5 ">
+					 <div class="font-bold text-lg text-orange-400 pb-4"><i class="fa-solid fa-location-dot pr-5"></i>근무지역</div>
+					 <select style="width:400px;" id="city" onchange="updateDistricts()" class="h-10 rounded-md select" name="city-select">
 					    <option class ="text-center h-40" value="" disabled selected>-- 시/도 선택 --</option>
 					    <option value="서울">서울</option>
 					    <option value="대전">대전</option>
@@ -76,18 +73,18 @@
 					  	</select>	
 					  
 					</div>
-				 <div class="option pr-10 pl-10 pt-4 pb-4 ">
-					 <div class="font-bold pb-4">기관유형</div>
-				     <select id="institutionType" style ="height:40px; border-radius: 5px; width: 70%; " name="institution-type-select" class="select">
-					   <option class ="text-center h-40" value="" disabled selected>기관유형을 선택해주세요</option>
+				 <div class="option p-5 ">
+					 <div class="font-bold text-lg text-orange-400 pb-4"><i class="fa-solid fa-school pr-5"></i>기관유형</div>
+				     <select style="width:400px;" id="institutionType" name="institution-type-select" class="h-10 rounded-md select">
+					   <option class ="text-center" value=""  disabled selected>기관유형을 선택해주세요</option>
 				       <option value="유치원">유치원</option>
 				       <option value="어린이집">어린이집</option>
 				     </select>
 				 </div>	
 				 <div class="text-center">
-					<div class="text-center font-bold pt-4">후기유형</div>
+					<div class="text-center font-bold pt-4 text-lg text-orange-400"><i class="fa-regular fa-pen-to-square pr-5"></i>후기유형</div>
 					<br />
-						<div >
+						<div class="">
 						<label>
 							<input class="radio radio-neutral radio-xs" name="boardId" type="radio" value="1" />
 							근무 후기
@@ -105,26 +102,23 @@
 						</div>
 					</div>
 				</div> 
-				<div class="text-center p-10">
+				<div class="text-center pt-10">
 				  <button type="button"
-					        class="btn-wide btn-m text-black bg-[#ffbf73] border-none hover:bg-[#f79614df] hover:border-[#ff9d23]"
-					        style="width:150px; height:40px; border-radius: 5px;"
+					        class="btn-wide w-150px h-10 rounded-md btn-m text-black bg-orange-300 hover:bg-orange-400 border-none transition hover:border-[#ff9d23]"
 					        onclick="goToWritePage()">
 					  다음
 					</button>
 				</div>
 				</div>
+				</div>
 			</form>
 		</div>
-			<div class="bg-white p-6 text-center flex justify-end">
-				<div><button class="btn btn-outline btn-s" onclick="history.back();" style="border-radius: 5px;">뒤로가기</button></div>
-			</div>
+		
 	</section>
 
 
 	<script>
 	
-	<!-- hidden fields 추가 -->
 	
 
 	function goToWritePage() {
@@ -138,7 +132,6 @@
 	    if (!institutionType) { alert("기관유형을 선택해주세요."); return; }
 	    if (!selectedReviewType) { alert("후기 유형을 선택해주세요."); return; }
 
-	    // hidden 필드에 값 세팅 (POST 폼 제출용)
 	    document.getElementById('hiddenWorkType').value = workType;
 	    document.getElementById('hiddenCity').value = city;
 	    document.getElementById('hiddenInstitutionType').value = institutionType;

@@ -16,7 +16,7 @@ public class ArticleService {
 		this.articleDao = articleDao;
 	}
 	
-	public int writeArticle(String institutionName, String content, int memberId, int boardId,
+	public int writeArticle(String institutionName, String institutionComment, int memberId, int boardId,
             Integer salaryScore, Integer welfareScore, Integer environmentScore,
             String salaryComment, String welfareComment, String environmentComment, String commuteTimeComment,
             List<String> salaryOptions, List<String> welfareOptions, List<String> environmentOptions,
@@ -24,7 +24,7 @@ public class ArticleService {
 
 		Article article = new Article();
 		article.setInstitutionName(institutionName);
-		article.setContent(content);
+		article.setInstitutionComment(institutionComment);
 		article.setMemberId(memberId);
 		article.setBoardId(boardId);
 		article.setSalaryScore(salaryScore);
@@ -70,8 +70,8 @@ public class ArticleService {
         return this.articleDao.getArticleById(id);
     }
 
-    public void modifyArticle(String institutionName, int id, String content) {
-        this.articleDao.modifyArticle(institutionName, id, content);
+    public void modifyArticle(String institutionName, int id, String institutionComment) {
+        this.articleDao.modifyArticle(institutionName, id, institutionComment);
     }
 
     public void deleteArticle(int id) {
