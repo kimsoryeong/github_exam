@@ -21,6 +21,7 @@ public interface ArticleDao {
 		            updateDate = NOW(),
 		            memberId = #{memberId},
 		            institutionName = #{institutionName},
+		            boardName = #{boardName},
 		            boardId = #{boardId},
 		            institutionComment = #{institutionComment},
 		            salaryScore = #{salaryScore},
@@ -32,7 +33,12 @@ public interface ArticleDao {
 		            commuteTimeComment = #{commuteTimeComment},
 		            workType = #{workType},
 		            city = #{city},
-		            institutionType = #{institutionType}
+		            institutionType = #{institutionType},
+		            interviewComment = #{interviewComment},
+		            personalHistory = #{personalHistory},
+		            interviewMaterial = #{interviewMaterial},
+		            interviewQnA = #{interviewQnA},
+		            interviewResults = #{interviewResults}
 		""")
 		@Options(useGeneratedKeys = true, keyProperty = "id")
 		int writeArticle(Article article);
@@ -93,6 +99,11 @@ public interface ArticleDao {
 				    a.workType,
 				    a.city,
 				    a.institutionType,
+				    a.interviewComment,
+		            a.personalHistory,
+		            a.interviewMaterial,
+		            a.interviewQnA,
+		            a.interviewResults,
 				    m.loginId AS writerName
 				FROM article a
 				JOIN member m ON a.memberId = m.id

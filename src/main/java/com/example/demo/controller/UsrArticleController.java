@@ -42,11 +42,11 @@ public class UsrArticleController {
 	@ResponseBody
 	public String doWrite(
 	    @RequestParam String institutionName,
-	    @RequestParam String institutionComment,
-	    @RequestParam int boardId,
-	    @RequestParam Integer salaryScore,
-	    @RequestParam Integer welfareScore,
-	    @RequestParam Integer environmentScore,
+	    @RequestParam(required = false) String institutionComment,
+	    @RequestParam String boardName,
+	    @RequestParam(required = false) Integer salaryScore,
+	    @RequestParam(required = false) Integer welfareScore,
+	    @RequestParam(required = false) Integer environmentScore,
 	    @RequestParam(required = false) String salaryComment,
 	    @RequestParam(required = false) String welfareComment,
 	    @RequestParam(required = false) String environmentComment,
@@ -56,30 +56,46 @@ public class UsrArticleController {
 	    @RequestParam(required = false) List<String> environmentOptions,
 	    @RequestParam(required = false) String workType,
 	    @RequestParam(required = false) String city,
-	    @RequestParam(required = false) String institutionType) {
+	    @RequestParam(required = false) String institutionType,
+	    @RequestParam(required = false) String interviewComment,
+	    @RequestParam(required = false) String personalHistory,
+	    @RequestParam(required = false) String interviewMaterial,
+	    @RequestParam(required = false) String interviewQnA,
+	    @RequestParam(required = false) String interviewResults) {
 		
 		 
-	    if (salaryScore == null) {
-	        return Util.jsBack("급여 별점을 선택해 주세요.");
-	    }
-	    if (welfareScore == null) {
-	        return Util.jsBack("복지 별점을 선택해 주세요.");
-	    }
-	    if (environmentScore == null) {
-	        return Util.jsBack("근무환경 별점을 선택해 주세요.");
+	  
+		int memberId = this.req.getLoginedMember().getId();
+
+	    Article article = new Article();
+	    article.setInstitutionName(institutionName);
+	    article.setInstitutionComment(institutionComment);
+	    article.setBoardName(boardName);
+	    article.setMemberId(memberId);
+	    article.setWorkType(workType);
+	    article.setCity(city);
+	    article.setInstitutionType(institutionType);
+
+	    if ("근무 리뷰".equals(boardName)) {
+	        article.setSalaryScore(salaryScore != null ? salaryScore : 0);
+	        article.setWelfareScore(welfareScore != null ? welfareScore : 0);
+	        article.setEnvironmentScore(environmentScore != null ? environmentScore : 0);
+	        article.setSalaryComment(salaryComment);
+	        article.setWelfareComment(welfareComment);
+	        article.setEnvironmentComment(environmentComment);
+	        article.setCommuteTimeComment(commuteTimeComment);
+	        article.setSalaryOptions(salaryOptions);
+	        article.setWelfareOptions(welfareOptions);
+	        article.setEnvironmentOptions(environmentOptions);
+	    } else if ("면접 리뷰".equals(boardName)) {
+	        article.setInterviewComment(interviewComment);
+	        article.setPersonalHistory(personalHistory);
+	        article.setInterviewMaterial(interviewMaterial);
+	        article.setInterviewQnA(interviewQnA);
+	        article.setInterviewResults(interviewResults);
 	    }
 
-	    int memberId = this.req.getLoginedMember().getId();
-
-	    // 한 번만 호출
-	    int articleId = this.articleService.writeArticle(
-	            institutionName, institutionComment, memberId, boardId,
-	            salaryScore, welfareScore, environmentScore,
-	            salaryComment, welfareComment, environmentComment, commuteTimeComment,
-	            salaryOptions, welfareOptions, environmentOptions,
-	            workType, city,  institutionType
-	    );
-
+	    int articleId = this.articleService.writeArticle(article);
 	    return Util.jsReplace("게시글 작성!", String.format("detail?id=%d", articleId));
 	}
 
@@ -97,8 +113,8 @@ public class UsrArticleController {
 	
 	@GetMapping("/usr/article/workingWrite")
 	public String workingWrite(Model model) {
-	    Article article = new Article();  // 빈 객체 생성
-	    model.addAttribute("article", article);  // 뷰에서 article 사용 가능하게
+	    Article article = new Article();  
+	    model.addAttribute("article", article);  
 
 	    return "usr/article/workingWrite";
 	}
@@ -107,7 +123,9 @@ public class UsrArticleController {
 	@GetMapping("/usr/article/detail")
 	public String detail(Model model, int id) {
 	    Article article = articleService.getArticleById(id);
-
+	    Board board = boardService.getBoard(article.getBoardId());
+	    model.addAttribute("article", article);
+	    model.addAttribute("board", board);
 	    System.out.println("salaryScore: " + article.getSalaryScore());
 	    System.out.println("welfareScore: " + article.getWelfareScore());
 	    System.out.println("environmentScore: " + article.getEnvironmentScore());

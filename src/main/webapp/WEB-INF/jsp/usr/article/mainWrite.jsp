@@ -3,25 +3,8 @@
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
 
 <c:set var="pageTitle" value="기관리뷰 작성" />
+<%@ include file="/WEB-INF/jsp/common/header.jsp" %> 
 
-<!DOCTYPE html>
-<html>
-<head>
-<!-- 제이쿼리 -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js" integrity="sha512-v2CJ7UaYy4JwqLDIrZUI/4hqeoQieOmAZNXBeQyjo21dadnwR+8ZaIJVT8EE2iyI61OV8e6M8PP2/4hpQINQ/g==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-<!-- 테일윈드, 데이지UI -->
-<script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
-<link href="https://cdn.jsdelivr.net/npm/daisyui@5" rel="stylesheet" type="text/css" />
-<!-- 폰트어썸 -->
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" integrity="sha512-Evv84Mr4kqVGRNSgIGL/F/aIDqQb7xQ2vcrdIwxfjThSH8CSR7PBEakCr51Ck+w+/U6swU2Im1vVX0SVk9ABhg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
-<!-- 공용 CSS -->
-<link rel="stylesheet" href="/resource/common.css" />
-<meta charset="UTF-8">
-<title>${pageTitle }</title>
-<link rel="shortcut icon" href="/resource/images/favicon.ico" />
-</head>
-
-<%-- <%@ include file="/WEB-INF/jsp/common/header.jsp" %> --%>
 	<section class="flex items-center justify-center bg-gray-100 h-screen">
 		<div class="bg-white mb-30 min-w-max shadow-xl rounded-xl h-fit">
 		<div class="flex justify-end pr-5 pt-2 text-orange-300 hover:text-orange-400 items-center h-15">
@@ -30,7 +13,7 @@
 			<form id="reviewForm" onsubmit="return false;">
 			<div class=" rounded-2xl mx-auto text-center w-full max-w-2xl px-4">
 				<div class="">
-				<span class="px-2 items-center text-orange-500 font-bold text-3xl"><a href="/">KinderReview</a></span>
+				<span class="px-2 items-center text-orange-500 font-bold text-3xl">KinderReview</span>
 				<span class="px-2 items-center font-bold text-2xl">기관 리뷰 작성</span>
 				</div>
 			<div class="px-15 pt-5 pb-10">
@@ -82,32 +65,33 @@
 				     </select>
 				 </div>	
 				 <div class="text-center">
-					<div class="text-center font-bold pt-4 text-lg text-orange-400"><i class="fa-regular fa-pen-to-square pr-5"></i>후기유형</div>
+					<div class="text-center font-bold pt-4 text-lg text-orange-400"><i class="fa-regular fa-pen-to-square pr-5"></i>리뷰유형</div>
 					<br />
 						<div class="">
 						<label>
-							<input class="radio radio-neutral radio-xs" name="boardId" type="radio" value="1" />
-							근무 후기
+							<input class="radio radio-neutral radio-xs" name="boardName" type="radio" value="근무 리뷰" />
+							근무 리뷰
 						</label>
 						&nbsp;&nbsp;&nbsp;
 						<label>
-							<input class="radio radio-neutral radio-xs" name="boardId" type="radio" value="2" />
-							면접 후기
+							<input class="radio radio-neutral radio-xs" name="boardName" type="radio" value="면접 리뷰" />
+							면접 리뷰
 						</label>
 						&nbsp;&nbsp;&nbsp;
 						<label>
-							<input class="radio radio-neutral radio-xs" name="boardId" type="radio" value="3" />
-							실습 및 봉사 후기
+							<input class="radio radio-neutral radio-xs" name="boardName" type="radio" value="실습 및 봉사 리뷰" />
+							실습 및 봉사 리뷰
 						</label>
 						</div>
 					</div>
 				</div> 
 				<div class="text-center pt-10">
 				  <button type="button"
-					        class="btn-wide w-150px h-10 rounded-md btn-m text-black bg-orange-300 hover:bg-orange-400 border-none transition hover:border-[#ff9d23]"
+					        class="btn-wide w-150px h-10 font-bold rounded-md bg-orange-300 hover:bg-orange-400 text-white border-none transition"
 					        onclick="goToWritePage()">
 					  다음
 					</button>
+					
 				</div>
 				</div>
 				</div>
@@ -118,68 +102,72 @@
 
 
 	<script>
-	
-	
+function goToWritePage() {
+    const workType = document.querySelector('select[name="work-type-select"]').value;
+    const city = document.querySelector('select[name="city-select"]').value;
+    const institutionType = document.querySelector('select[name="institution-type-select"]').value;
+    const selectedReviewType = document.querySelector('input[name="boardName"]:checked');
 
-	function goToWritePage() {
-	    const workType = document.querySelector('select[name="work-type-select"]').value;
-	    const city = document.querySelector('select[name="city-select"]').value;
-	    const institutionType = document.querySelector('select[name="institution-type-select"]').value;
-	    const selectedReviewType = document.querySelector('input[name="boardId"]:checked');
+    if (!workType) { alert("근무유형을 선택해주세요."); return; }
+    if (!city) { alert("근무지역을 선택해주세요."); return; }
+    if (!institutionType) { alert("기관유형을 선택해주세요."); return; }
+    if (!selectedReviewType) { alert("후기 유형을 선택해주세요."); return; }
 
-	    if (!workType) { alert("근무유형을 선택해주세요."); return; }
-	    if (!city) { alert("근무지역을 선택해주세요."); return; }
-	    if (!institutionType) { alert("기관유형을 선택해주세요."); return; }
-	    if (!selectedReviewType) { alert("후기 유형을 선택해주세요."); return; }
+    if (document.getElementById('hiddenWorkType')) document.getElementById('hiddenWorkType').value = workType;
+    if (document.getElementById('hiddenCity')) document.getElementById('hiddenCity').value = city;
+    if (document.getElementById('hiddenInstitutionType')) document.getElementById('hiddenInstitutionType').value = institutionType;
 
-	    document.getElementById('hiddenWorkType').value = workType;
-	    document.getElementById('hiddenCity').value = city;
-	    document.getElementById('hiddenInstitutionType').value = institutionType;
+    const boardName = selectedReviewType.value; 
+    let url = "";
 
-	    const boardId = selectedReviewType.value;
-	    let url = "";
-	    switch (boardId) {
-	        case "1":
-	            url = "/usr/article/workingWrite?workType=" + encodeURIComponent(workType)
-	                + "&city=" + encodeURIComponent(city)
-	                + "&institutionType=" + encodeURIComponent(institutionType);
-	            break;
-	        case "2":
-	            url = "/usr/article/interviewWrite?workType=" + encodeURIComponent(workType)
-	                + "&city=" + encodeURIComponent(city)
-	                + "&institutionType=" + encodeURIComponent(institutionType);
-	            break;
-	        case "3":
-	            url = "/usr/article/practiceWrite?workType=" + encodeURIComponent(workType)
-	                + "&city=" + encodeURIComponent(city)
-	                + "&institutionType=" + encodeURIComponent(institutionType);
-	            break;
-	    }
-	    location.href = url;
-	}
-	    $(function() {
-	        $('.select')
-	            .css({
-	                'border-color': 'black',
-	                'border-width': '1px',
-	                'border-style': 'solid'
-	            })
-	            .on('focus', function () {
-	                $(this).css({
-	                    'border-color': '#ff6900',
-	                    'border-width': '2px',
-	                    'border-style': 'solid'
-	                });
-	            })
-	            .on('blur', function () {
-	                $(this).css({
-	                    'border-color': 'black',
-	                });
-	            });
-	    });
+    switch (boardName) {
+        case "근무 리뷰":
+            url = "/usr/article/workingWrite?workType=" + encodeURIComponent(workType)
+                + "&city=" + encodeURIComponent(city)
+                + "&institutionType=" + encodeURIComponent(institutionType)
+                + "&boardName=" + encodeURIComponent(boardName);
+            break;
+        case "면접 리뷰":
+            url = "/usr/article/interviewWrite?workType=" + encodeURIComponent(workType)
+                + "&city=" + encodeURIComponent(city)
+                + "&institutionType=" + encodeURIComponent(institutionType)
+                + "&boardName=" + encodeURIComponent(boardName);
+            break;
+        case "실습 및 봉사 리뷰":
+            url = "/usr/article/practiceWrite?workType=" + encodeURIComponent(workType)
+                + "&city=" + encodeURIComponent(city)
+                + "&institutionType=" + encodeURIComponent(institutionType)
+                + "&boardName=" + encodeURIComponent(boardName);
+            break;
+        default:
+            alert("리뷰 유형을 다시 선택해주세요.");
+            return;
+    }
+    location.href = url;
+}
 
-		
+$(function() {
+    $('.select')
+        .css({
+            'border-color': 'black',
+            'border-width': '1px',
+            'border-style': 'solid'
+        })
+        .on('focus', function () {
+            $(this).css({
+                'border-color': '#ff6900',
+                'border-width': '2px',
+                'border-style': 'solid'
+            });
+        })
+        .on('blur', function () {
+            $(this).css({
+                'border-color': 'black',
+            });
+        });
+});
+</script>
 
-	  </script>
+
 	  
 <%@ include file="/WEB-INF/jsp/common/footer.jsp" %>

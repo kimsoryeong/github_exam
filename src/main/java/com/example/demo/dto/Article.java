@@ -15,6 +15,7 @@ public class Article {
     private String updateDate;
     private String institutionName;
     private String institutionComment;
+    private String boardName;
     private int boardId;
     private int memberId;
     private String writerName;
@@ -33,6 +34,11 @@ public class Article {
     private List<String> salaryOptions;
     private List<String> welfareOptions;
     private List<String> environmentOptions;
+    private String interviewComment;
+    private String personalHistory;
+    private String interviewMaterial;
+    private String interviewQnA;
+    private String interviewResults;
 
 
     public double calculateStar() {
