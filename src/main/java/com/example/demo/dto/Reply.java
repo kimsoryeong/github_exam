@@ -7,12 +7,16 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class FileDto {
+public class Reply {
 	private int id;
 	private String regDate;
-	private String originName;
-	private String savedName;
-	private String savedPath;
+	private String updateDate;
+	private int memberId;
+	private String nickname;
 	private String relTypeCode;
 	private int relId;
+	private String content;
+	private Boolean isSecret;
+	private Boolean isAnonymous;
+	private int parentId;
 }

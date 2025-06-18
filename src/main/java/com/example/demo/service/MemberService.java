@@ -14,18 +14,29 @@ public class MemberService {
 		this.memberDao = memberDao;
 	}
 
-	public void joinMember(String loginId, String loginPw, String nickname) {
-		this.memberDao.joinMember(loginId, loginPw, nickname);
+	// 개인회원 가입
+	public void joinPersonalMember(String loginId, String loginPw, String nickname) {
+		memberDao.joinPersonalMember(loginId, loginPw, nickname);
 	}
+
+	 public int joinCompanyMember(String loginId, String loginPw, String companyName, String companyNumber) {
+	        Member member = new Member();
+	        member.setLoginId(loginId);
+	        member.setLoginPw(loginPw);
+	        member.setCompanyName(companyName);
+	        member.setCompanyNumber(companyNumber);
+	        member.setAuthLevel(2);
+
+	        memberDao.joinCompanyMember(member);
+
+	        return member.getId();  // insert 후 자동으로 id가 채워짐
+	    }
+
 
 	public Member getMemberByLoginId(String loginId) {
 		return this.memberDao.getMemberByLoginId(loginId);
 	}
 
-	public void loginMember(String loginId, String loginPw) {
-		this.memberDao.loginMember(loginId, loginPw);
-		
-	}
 
 	public Member getMemberBynickname(String nickname) {
 		return this.memberDao.getMemberBynickname(nickname);

@@ -10,7 +10,8 @@
       <a href="/"><i class="text-orange-300 hover:text-orange-400 fa-solid fa-house fa-2xl"></i></a>
     </div>
     <div>
-      <form action="doWrite" method="post" id="reviewForm" autocomplete="off">
+      <form action="doWrite" method="post" id="reviewForm" enctype="multipart/form-data" autocomplete="off">
+        <input type="file" name="workCertFile">
         <input type="hidden" name="workType" value="${param.workType}" />
         <input type="hidden" name="city" value="${param.city}" />
         <input type="hidden" name="institutionType" value="${param.institutionType}" />

@@ -129,6 +129,7 @@ public interface ArticleDao {
 		            a.practiceAtmosphere,
 		            a.practiceExperience,
 					a.practiceReview,
+					a.views,
 				    m.loginId AS writerName
 				FROM article a
 				JOIN member m ON a.memberId = m.id
@@ -265,12 +266,13 @@ public interface ArticleDao {
 			        SELECT a.*
 			        FROM article a
 			        <where>
+			        a.boardId = #{boardId}
 			            <choose>
-			                <when test="searchType == 'institution'">
-			                    a.institutionName LIKE CONCAT('%', #{keyword}, '%')
+			                <when test="searchType.equals('institutionName')">
+								AND a.institutionName LIKE CONCAT('%', #{keyword}, '%')
 			                </when>
 			                <when test="searchType == 'content'">
-			                    (
+			                    AND (
 			                        a.institutionComment LIKE CONCAT('%', #{keyword}, '%')
 			                        OR a.salaryComment LIKE CONCAT('%', #{keyword}, '%')
 			                        OR a.welfareComment LIKE CONCAT('%', #{keyword}, '%')
@@ -292,7 +294,7 @@ public interface ArticleDao {
 			                    )
 			                </when>
 			                <otherwise>
-			                    (
+			                   AND (
 			                        a.institutionName LIKE CONCAT('%', #{keyword}, '%')
 			                        OR a.institutionComment LIKE CONCAT('%', #{keyword}, '%')
 			                        OR a.salaryComment LIKE CONCAT('%', #{keyword}, '%')
@@ -318,7 +320,7 @@ public interface ArticleDao {
 			        </where>
 			    </script>
 			""")
-		List<Article> searchKeyword(String searchType, String keyword);
+		List<Article> searchKeyword(@Param("boardId") int boardId,@Param("searchType") String searchType, @Param("keyword") String keyword);
 	
 		@Select("""
 			    <script>
@@ -339,8 +341,40 @@ public interface ArticleDao {
 			    @Param("articlesInPage") int articlesInPage,
 			    @Param("limitFrom") int limitFrom
 			);
+		
+		
+		@Update("""
+				UPDATE article
+					SET views = views + 1
+					WHERE id = #{id}
+				""")
+		public void increaseViews(int id);
 
 
+		@Select("""
+			    SELECT *
+			    FROM article
+			    WHERE boardId = #{boardId}
+			    ORDER BY views DESC
+			    LIMIT 2
+			""")
+			List<Article> getTopArticlesByViews(int boardId);
+
+
+
+
+		@Select("""
+			    SELECT *
+			    FROM article
+			    WHERE boardId = #{boardId}
+			    ORDER BY regDate DESC
+			    LIMIT #{limit}
+			""")
+			List<Article> getLatestArticlesByBoardId(@Param("boardId") int boardId, @Param("limit") int limit);
+
+
+
+		
 
 	
 

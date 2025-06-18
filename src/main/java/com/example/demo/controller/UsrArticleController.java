@@ -1,5 +1,6 @@
 package com.example.demo.controller;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -10,13 +11,21 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.example.demo.dto.Article;
 import com.example.demo.dto.Board;
+import com.example.demo.dto.Reply;
 import com.example.demo.dto.Req;
 import com.example.demo.service.ArticleService;
 import com.example.demo.service.BoardService;
+import com.example.demo.service.FileService;
+import com.example.demo.service.ReplyService;
 import com.example.demo.util.Util;
+
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 @Controller
 public class UsrArticleController {
@@ -24,11 +33,15 @@ public class UsrArticleController {
 	private ArticleService articleService;
 	private BoardService boardService;
 	private Req req;
+	private ReplyService replyService;
+	private final FileService fileService;
 	
-	public UsrArticleController(ArticleService articleService, BoardService boardService, Req req) {
+	public UsrArticleController(ArticleService articleService, BoardService boardService, Req req, ReplyService replyService, FileService fileService) {
 		this.articleService = articleService;
+		this.replyService = replyService;
 		this.boardService = boardService;
 		this.req = req;
+		this.fileService = fileService;
 	}
 	
 	@GetMapping("/usr/article/mainWrite")
@@ -70,8 +83,9 @@ public class UsrArticleController {
 	    @RequestParam(required = false) String educationalBackground,
 	    @RequestParam(required = false) String practiceAtmosphere,
 	    @RequestParam(required = false) String practiceExperience,
-	    @RequestParam(required = false) String practiceReview
-	) {
+	    @RequestParam(required = false) String practiceReview,
+	    @RequestParam(required = false) MultipartFile workCertFile
+	) throws IOException {
 	    int memberId = this.req.getLoginedMember().getId();
 
 	    Article article = new Article();
@@ -92,11 +106,9 @@ public class UsrArticleController {
 	        article.setEnvironmentComment(environmentComment);
 	        article.setCommuteTimeComment(commuteTimeComment);
 
-	        // 옵션 리스트 세팅
 	        article.setSalaryOptions(salaryOptions);
 	        article.setWelfareOptions(welfareOptions);
 
-	        // 옵션 String 세팅 (DB 저장용)
 	        article.setSalaryOptionsStr(
 	            (salaryOptions != null && !salaryOptions.isEmpty()) ? String.join(",", salaryOptions) : null
 	        );
@@ -122,9 +134,17 @@ public class UsrArticleController {
 	        article.setPracticeReview(practiceReview);
 	    }
 
+	    // ★ 1회만 호출!
 	    int articleId = this.articleService.writeArticle(article);
+
+	    // 근무 리뷰일 경우 첨부파일 저장
+	    if ("근무 리뷰".equals(boardName) && workCertFile != null && !workCertFile.isEmpty()) {
+	        fileService.saveFile(workCertFile, "article", articleId);
+	    }
+
 	    return Util.jsReplace("게시글 작성!", String.format("detail?id=%d", articleId));
 	}
+
 
 
 
@@ -148,31 +168,45 @@ public class UsrArticleController {
 
 	
 	@GetMapping("/usr/article/detail")
-	public String detail(Model model, int id) {
-
+	public String detail(HttpServletRequest request, HttpServletResponse response,Model model, int id) {
+	
+		Cookie[] cookies = request.getCookies();
+		boolean isViewed = false;
+		
+		if (cookies != null) {
+			for (Cookie cookie : cookies) {
+				if (cookie.getName().equals("viewedArticle_" + id)) {
+					isViewed = true;
+					break;
+				}
+			}
+		}
+		
+		if (!isViewed) {
+			this.articleService.increaseViews(id);
+			Cookie cookie = new Cookie("viewedArticle_" + id, "true");
+			cookie.setMaxAge(60 * 30);
+			cookie.setPath("/");
+			response.addCookie(cookie);
+		}
+		
 	    Article article = articleService.getArticleById(id);
 	    Board board = boardService.getBoard(article.getBoardId());
-	    
 	   
-	    System.out.println("salaryScore: " + article.getSalaryScore());
-	    System.out.println("welfareScore: " + article.getWelfareScore());
-	    System.out.println("environmentScore: " + article.getEnvironmentScore());
-	    System.out.println("interviewScore: " + article.getInterviewScore());
-	    System.out.println("practiceScore: " + article.getPracticeScore());
-	    
 	    List<String> salaryOptions = articleService.getOptions(id, "salary");
 	    List<String> welfareOptions = articleService.getOptions(id, "welfare");
+	    List<Reply> replies = this.replyService.getReplies("article", id);
 
-	    
 	    salaryOptions = new ArrayList<>(new LinkedHashSet<>(salaryOptions));
 	    welfareOptions = new ArrayList<>(new LinkedHashSet<>(welfareOptions));
 
-	   
-	    
 	    article.calculateStar();
 
 	    model.addAttribute("article", article);
 	    model.addAttribute("board", board);
+	    model.addAttribute("replies", replies);
+	    model.addAttribute("relId", id);
+	    model.addAttribute("relTypeCode", "article");
 	    
 	    return "usr/article/detail";
 	}
@@ -182,24 +216,33 @@ public class UsrArticleController {
 	public String list(Model model,
 	                   @RequestParam(required = false) Integer boardId,
 	                   @RequestParam(defaultValue = "1") int cPage,
-	                   @RequestParam(required = false) String city) {
+	                   @RequestParam(required = false) String city,
+	                   @RequestParam(required = false) String searchType,
+	                   @RequestParam(required = false) String keyword) {
 
 	    if (boardId == null) {
 	        return Util.jsBack("게시판 ID가 필요합니다.");
 	    }
 
+	    Board board = boardService.getBoard(boardId);
 	    int articlesInPage = 10;
 	    int limitFrom = (cPage - 1) * articlesInPage;
 
-	    int articlesCnt = articleService.getArticlesCnt(boardId, city);
-	    int totalPagesCnt = (int) Math.ceil(articlesCnt / (double) articlesInPage);
+	    List<Article> articles;
+	    int articlesCnt;
 
+	    if (keyword != null && !keyword.trim().isEmpty()) {
+	        articles = articleService.SearchKeyword(boardId, searchType, keyword);
+	        articlesCnt = articles.size();
+	    } else {
+	        articles = articleService.getArticles(boardId, city, articlesInPage, limitFrom);
+	        articlesCnt = articleService.getArticlesCnt(boardId, city);
+	    }
+
+	    int totalPagesCnt = (int) Math.ceil(articlesCnt / (double) articlesInPage);
 	    int begin = ((cPage - 1) / 10) * 10 + 1;
 	    int end = (((cPage - 1) / 10) + 1) * 10;
 	    if (end > totalPagesCnt) end = totalPagesCnt;
-
-	    List<Article> articles = articleService.getArticles(boardId, city, articlesInPage, limitFrom);
-	    Board board = boardService.getBoard(boardId);
 
 	    model.addAttribute("board", board);
 	    model.addAttribute("cPage", cPage);
@@ -209,10 +252,14 @@ public class UsrArticleController {
 	    model.addAttribute("articlesCnt", articlesCnt);
 	    model.addAttribute("articles", articles);
 	    model.addAttribute("city", city);
-
+	    model.addAttribute("keyword", keyword);
+	    model.addAttribute("searchType", searchType);
+	    model.addAttribute("workingTopArticles", articleService.getTopArticlesByViews(4));
+	    model.addAttribute("interviewTopArticles", articleService.getTopArticlesByViews(5));
+	    model.addAttribute("practiceTopArticles", articleService.getTopArticlesByViews(6));
+	    
 	    return "usr/article/list";
 	}
-
 
 	@GetMapping("/usr/article/modify")
 	public String modify(Model model, int id) {
@@ -283,13 +330,7 @@ public class UsrArticleController {
 		return Util.jsReplace(String.format("%d번 게시글이 삭제되었습니다", id), String.format("list?boardId=%d", boardId));
 	}
 	
-	@PostMapping("/usr/article/list")
-	@ResponseBody
-	public void SearchKeyword(Model model, @RequestParam String searchType, @RequestParam String keyword) {
-		List<Article> articles = articleService.SearchKeyword(searchType, keyword);
-		model.addAttribute("articles", articles);
-		
-	}
+
 	
 	
 }
