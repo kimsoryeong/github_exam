@@ -14,22 +14,29 @@ public class MemberService {
 		this.memberDao = memberDao;
 	}
 
-	// 개인회원 가입
 	public void joinPersonalMember(String loginId, String loginPw, String nickname) {
+		Member member = new Member();
+		member.setLoginId(loginId);
+		member.setLoginPw(loginPw);
+		member.setNickname(nickname);
+		member.setAuthLevel(1);
+		member.setApproveStatus(1);
+		
 		memberDao.joinPersonalMember(loginId, loginPw, nickname);
 	}
 
-	 public int joinCompanyMember(String loginId, String loginPw, String companyName, String companyNumber) {
+	 public int joinInstitutionMember(String loginId, String loginPw, String institutionName, String institutionNumber) {
 	        Member member = new Member();
 	        member.setLoginId(loginId);
 	        member.setLoginPw(loginPw);
-	        member.setCompanyName(companyName);
-	        member.setCompanyNumber(companyNumber);
+	        member.setInstitutionName(institutionName);
+	        member.setInstitutionNumber(institutionNumber);
 	        member.setAuthLevel(2);
+	        member.setApproveStatus(0);
+	        
+	        memberDao.joinInstitutionMember(member);
 
-	        memberDao.joinCompanyMember(member);
-
-	        return member.getId();  // insert 후 자동으로 id가 채워짐
+	        return member.getId();  
 	    }
 
 
@@ -41,5 +48,14 @@ public class MemberService {
 	public Member getMemberBynickname(String nickname) {
 		return this.memberDao.getMemberBynickname(nickname);
 	}
+
+	public Member getMemberById(int id) {
+		return this.memberDao.getMemberById(id);
+	}
+	
+	public String getWorkChkFileByMemberId(int memberId) {
+	    return memberDao.findWorkChkFileByMemberId(memberId);
+	} //사업자등록증 확인용
+
 
 }

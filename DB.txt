@@ -20,10 +20,14 @@ CREATE TABLE `member` (
     loginId VARCHAR(50) NOT NULL UNIQUE,
     loginPw VARCHAR(100) NOT NULL,
     nickname VARCHAR(50) DEFAULT NULL,
-    companyName VARCHAR(255) DEFAULT NULL,
-    companyNumber VARCHAR(100) DEFAULT NULL,
-   authLevel INT UNSIGNED NOT NULL DEFAULT 1 COMMENT '0=관리자, 1=개인회원, 2=기업회원'
+    institutionName VARCHAR(255) DEFAULT NULL,
+    institutionNumber VARCHAR(100) DEFAULT NULL,
+    authLevel INT UNSIGNED NOT NULL DEFAULT 1 COMMENT '0=관리자, 1=개인회원, 2=기업회원',
+    approveStatus TINYINT NOT NULL DEFAULT 1 COMMENT '0: 대기, 1: 승인, 2: 반려',
+    workChkFile VARCHAR(255) DEFAULT NULL COMMENT '사업자등록증 파일체크',
+    rejectReason VARCHAR(255) DEFAULT NULL COMMENT '반려 사유'
 );
+
 
 CREATE TABLE article(
     id INT UNSIGNED PRIMARY KEY AUTO_INCREMENT,
@@ -61,7 +65,9 @@ CREATE TABLE article(
     practiceAtmosphere TEXT,
     practiceExperience TEXT,
     practiceReview TEXT,
-    views INT UNSIGNED NOT NULL DEFAULT 0
+    views INT UNSIGNED NOT NULL DEFAULT 0,
+    rejectReason VARCHAR(255) DEFAULT NULL COMMENT '반려 사유',
+    reviewStatus TINYINT NOT NULL DEFAULT 1 COMMENT '0:대기, 1:승인, 2:반려';
 );
 
 
@@ -129,7 +135,7 @@ INSERT INTO board
     SET boardName = '기관 리뷰';
     
 INSERT INTO board
-    SET boardName = '지역별 커뮤니티';
+    SET boardName = '커뮤니티';
 
 INSERT INTO board
     SET boardName = '근무 리뷰';
@@ -148,6 +154,12 @@ INSERT INTO board
     
 INSERT INTO board
     SET boardName = '채용 공고';
+    
+    INSERT INTO board
+    SET boardName = '공지사항';
+    
+    INSERT INTO board
+    SET boardName = '자유게시판';
     
 INSERT INTO article
     SET regDate = NOW()
@@ -213,6 +225,16 @@ INSERT INTO `member`
         , loginPw = 'test1'
         , nickname = '유저1';
 
+
+        
+INSERT INTO `member`
+    SET regDate = NOW()
+        , updateDate = NOW()
+        , loginId = 'admin'
+        , loginPw = 'admin'
+        , nickname = '관리자'
+        , authLevel = 0 ;
+        
 INSERT INTO `member`
     SET regDate = NOW()
         , updateDate = NOW()

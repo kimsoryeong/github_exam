@@ -50,7 +50,8 @@ public interface ArticleDao {
 		            practiceExperience = #{practiceExperience},
 		            practiceReview = #{practiceReview},
 		            salaryOptionsStr = #{salaryOptionsStr},
-		            welfareOptionsStr = #{welfareOptionsStr}
+		            welfareOptionsStr = #{welfareOptionsStr},
+		            reviewStatus = #{reviewStatus}
 		""")
 		@Options(useGeneratedKeys = true, keyProperty = "id")
 		int writeArticle(Article article);
@@ -130,6 +131,7 @@ public interface ArticleDao {
 		            a.practiceExperience,
 					a.practiceReview,
 					a.views,
+					a.reviewStatus,
 				    m.loginId AS writerName
 				FROM article a
 				JOIN member m ON a.memberId = m.id
@@ -373,10 +375,84 @@ public interface ArticleDao {
 			List<Article> getLatestArticlesByBoardId(@Param("boardId") int boardId, @Param("limit") int limit);
 
 
+		@Select("""
+			    SELECT *
+			    FROM article
+			    WHERE memberId = #{memberId}
+			    ORDER BY regDate DESC
+			""")
+			List<Article> getArticlesByMemberId(@Param("memberId") int memberId);
 
+		@Select("""
+			    SELECT a.*
+				FROM article a
+			    INNER JOIN likePoint lp ON a.id = lp.relId
+			    WHERE lp.memberId = #{memberId}
+			    AND lp.relTypeCode = #{relTypeCode}
+			    ORDER BY a.regDate DESC
+			""")
+			List<Article> getLikedArticlesByMemberId(int memberId, String relTypeCode) ;
 		
+		
+		
+		@Select("""
+			    SELECT * 
+				FROM article 
+				WHERE memberId = #{memberId} 
+				AND (
+			        (boardName = '근무 리뷰' AND reviewStatus = 0)
+			        OR (boardName != '근무 리뷰' AND reviewStatus = 1)
+			      )
+				ORDER BY regDate DESC
+			""")
+			List<Article> getPendingArticlesByMemberId(int memberId);
 
-	
+
+
+		@Select("""
+			    SELECT
+        a.id,
+        a.regDate,
+        a.updateDate,
+        a.institutionName,
+        a.institutionComment,
+        a.boardId,
+        a.memberId,
+        a.salaryScore,
+        a.welfareScore,
+        a.environmentScore,
+        a.interviewScore,
+        a.practiceScore,
+        a.salaryComment,
+        a.welfareComment,
+        a.environmentComment,
+        a.commuteTimeComment,
+        a.salaryOptionsStr,
+        a.welfareOptionsStr,
+        a.workType,
+        a.city,
+        a.institutionType,
+        a.interviewComment,
+        a.personalHistory,
+        a.interviewMaterial,
+        a.interviewTip,
+        a.interviewProgress,
+        a.interviewCompleted,
+        a.interviewQnA,
+        a.interviewResults,
+        a.practiceComment,
+        a.educationalBackground,
+        a.practiceAtmosphere,
+        a.practiceExperience,
+        a.practiceReview,
+        a.views,
+        a.reviewStatus,
+        m.loginId AS writerName
+    FROM article a
+    JOIN member m ON a.memberId = m.id
+    WHERE a.id = #{id} AND a.reviewStatus = 1
+			""")
+		Article getApprovedArticleById(int id);
 
 	
 

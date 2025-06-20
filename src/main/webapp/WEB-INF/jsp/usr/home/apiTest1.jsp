@@ -8,24 +8,19 @@
 
 
 	<script>
-	/* ?serviceKey=&numOfRows=10&pageNo=1&dataType=XML */
 		const api_key = 'TYVGBMLA-TYVG-TYVG-TYVG-TYVGBMLAF1';
-		const url = 'https://www.safemap.go.kr/openApiService/data/getInfantFacilityData.do';
+		const url = 'http://e-childschoolinfo.moe.go.kr/openApi/openApiIntro.do?pageName=openApiIntro4';
 		
 		const apiTest = function (){
 			$.ajax({
 				url: url,
 				type: 'GET',
 				data: {
-					serviceKey: api_key,
-					numOfRows: 5000,
-					pageNo: 1,
-					dataType: 'XML'
+					
 				},
 				dataType: 'XML',
 				success: function (data){
 					console.log(data);
-					/* $('#apiTest'); */
 				},
 				error: function (xhr, status, error) {
 					console.log(error);

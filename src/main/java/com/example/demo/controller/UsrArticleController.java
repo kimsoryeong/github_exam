@@ -1,13 +1,22 @@
 package com.example.demo.controller;
 
+import java.io.File;
 import java.io.IOException;
+import java.net.MalformedURLException;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
 
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.UrlResource;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -15,6 +24,8 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.example.demo.dto.Article;
 import com.example.demo.dto.Board;
+import com.example.demo.dto.FileDto;
+import com.example.demo.dto.LoginedMember;
 import com.example.demo.dto.Reply;
 import com.example.demo.dto.Req;
 import com.example.demo.service.ArticleService;
@@ -134,23 +145,60 @@ public class UsrArticleController {
 	        article.setPracticeReview(practiceReview);
 	    }
 
-	    // ★ 1회만 호출!
 	    int articleId = this.articleService.writeArticle(article);
 
-	    // 근무 리뷰일 경우 첨부파일 저장
 	    if ("근무 리뷰".equals(boardName) && workCertFile != null && !workCertFile.isEmpty()) {
 	        fileService.saveFile(workCertFile, "article", articleId);
 	    }
+	    article.setReviewStatus(0);  
 
-	    return Util.jsReplace("게시글 작성!", String.format("detail?id=%d", articleId));
+
+	    if ("근무 리뷰".equals(boardName)) {
+	        return Util.jsReplace("관리자의 승인 후 게시글이 등록됩니다.", "/usr/member/myPage");
+	    } else {
+	        return Util.jsReplace("게시글 작성!", String.format("detail?id=%d", articleId));
+	    }
 	}
 
 
+	@GetMapping("/usr/article/file/view/{fileName:.+}")
+	@ResponseBody
+	public ResponseEntity<Resource> viewFile(@PathVariable String fileName) throws IOException {
+	    String filePath = fileService.getFullPath(fileName);
+	    File file = new File(filePath);
 
+	    System.out.println("파일경로 :" + filePath);
+
+	    if (!file.exists()) {
+	        return ResponseEntity.notFound().build();
+	    }
+
+	    UrlResource resource;
+	    try {
+	        resource = new UrlResource(file.toURI().toURL());
+	    } catch (MalformedURLException e) {
+	        throw new RuntimeException("URL 생성 실패: " + file.getAbsolutePath(), e);
+	    }
+
+	    String contentType = Files.probeContentType(file.toPath());
+	    if (contentType == null) {
+	        contentType = "application/octet-stream"; // 기본값
+	    }
+
+	    return ResponseEntity.ok()
+	            .contentType(MediaType.parseMediaType(contentType))
+	            .header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"" + file.getName() + "\"")
+	            .body(resource);
+	}
 
 	@GetMapping("/usr/article/interviewWrite")
 	public String interviewWrite() {
 		return "usr/article/interviewWrite";
+	}
+
+	@GetMapping("/usr/article/hireWrite")
+	public String hireWrite() {
+		return "usr/article/hireWrite";
 	}
 	
 	@GetMapping("/usr/article/practiceWrite")
@@ -159,40 +207,41 @@ public class UsrArticleController {
 	}
 	
 	@GetMapping("/usr/article/workingWrite")
-	public String workingWrite(Model model) {
-	    Article article = new Article();  
-	    model.addAttribute("article", article);  
-
+	public String workingWrite(HttpServletRequest req, Model model) {
+	    model.addAttribute("article", new Article());
 	    return "usr/article/workingWrite";
 	}
 
 	
 	@GetMapping("/usr/article/detail")
-	public String detail(HttpServletRequest request, HttpServletResponse response,Model model, int id) {
-	
-		Cookie[] cookies = request.getCookies();
-		boolean isViewed = false;
-		
-		if (cookies != null) {
-			for (Cookie cookie : cookies) {
-				if (cookie.getName().equals("viewedArticle_" + id)) {
-					isViewed = true;
-					break;
-				}
-			}
-		}
-		
-		if (!isViewed) {
-			this.articleService.increaseViews(id);
-			Cookie cookie = new Cookie("viewedArticle_" + id, "true");
-			cookie.setMaxAge(60 * 30);
-			cookie.setPath("/");
-			response.addCookie(cookie);
-		}
-		
+	public String detail(HttpServletRequest request, HttpServletResponse response, Model model, int id) {
+
+	    Cookie[] cookies = request.getCookies();
+	    boolean isViewed = false;
+
+	    if (cookies != null) {
+	        for (Cookie cookie : cookies) {
+	            if (cookie.getName().equals("viewedArticle_" + id)) {
+	                isViewed = true;
+	                break;
+	            }
+	        }
+	    }
+
+	    if (!isViewed) {
+	        this.articleService.increaseViews(id);
+	        Cookie cookie = new Cookie("viewedArticle_" + id, "true");
+	        cookie.setMaxAge(60 * 30);
+	        cookie.setPath("/");
+	        response.addCookie(cookie);
+	    }
+
 	    Article article = articleService.getArticleById(id);
+	    if ("근무 리뷰".equals(article.getBoardName()) && article.getReviewStatus() != 1) {
+	        return "common/notAuthorized";
+	    }
 	    Board board = boardService.getBoard(article.getBoardId());
-	   
+
 	    List<String> salaryOptions = articleService.getOptions(id, "salary");
 	    List<String> welfareOptions = articleService.getOptions(id, "welfare");
 	    List<Reply> replies = this.replyService.getReplies("article", id);
@@ -207,9 +256,24 @@ public class UsrArticleController {
 	    model.addAttribute("replies", replies);
 	    model.addAttribute("relId", id);
 	    model.addAttribute("relTypeCode", "article");
-	    
+	    model.addAttribute("salaryOptions", salaryOptions);
+	    model.addAttribute("welfareOptions", welfareOptions);
+
+	    Req req = (Req) request.getAttribute("req");
+	    int authLevel = 999;
+	    if (req != null && req.isLogined()) {
+	        authLevel = req.getLoginedMember().getAuthLevel();
+	    }
+	    model.addAttribute("isAdmin", authLevel == 0);
+
+	    if (authLevel == 0) {
+	        List<FileDto> files = fileService.getFilesByRel("article", id);
+	        model.addAttribute("files", files);
+	    }
+
 	    return "usr/article/detail";
 	}
+
 
 	
 	@GetMapping("/usr/article/list")
@@ -225,6 +289,8 @@ public class UsrArticleController {
 	    }
 
 	    Board board = boardService.getBoard(boardId);
+	    boolean onlyApproved = "근무 리뷰".equals(board.getBoardName());
+
 	    int articlesInPage = 10;
 	    int limitFrom = (cPage - 1) * articlesInPage;
 
@@ -263,13 +329,19 @@ public class UsrArticleController {
 
 	@GetMapping("/usr/article/modify")
 	public String modify(Model model, int id) {
-		
-		Article article = this.articleService.getArticleById(id);
-		
-		model.addAttribute("article", article);
-		
-		return "usr/article/modify";
+	    Article article = this.articleService.getArticleById(id);
+
+	    LoginedMember loginedMember = req.getLoginedMember();
+	    int loginedMemberId = loginedMember.getId();
+
+	    if (article == null || article.getMemberId() != loginedMemberId) {
+	        return "common/notAuthorized";
+	    }
+
+	    model.addAttribute("article", article);
+	    return "usr/article/modify";
 	}
+
 	
 	@PostMapping("/usr/article/doModify")
 	@ResponseBody

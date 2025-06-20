@@ -59,10 +59,11 @@ public class ArticleService {
         return articleDao.getArticlesWithRegion(boardId, city, articlesInPage, limitFrom);
     }
 
-	public Article getArticleById(int id) {
+public Article getArticleById(int id) {
 		
 	    return articleDao.getArticleById(id);
 	}
+
 
 	 public List<Article> SearchKeyword(Integer boardId, String searchType, String keyword) {
 	        return articleDao.searchKeyword(boardId, searchType, keyword);
@@ -113,10 +114,22 @@ public class ArticleService {
     public List<Article> getLatestArticlesByBoardId(int boardId, int limit) {
         return articleDao.getLatestArticlesByBoardId(boardId, limit);
     }
+    
+    public List<Article> getArticlesByMemberId(int memberId) {
+        return articleDao.getArticlesByMemberId(memberId);
+    }
 
 
+    public List<Article> getLikedArticlesByMemberId(int memberId) {
+        return articleDao.getLikedArticlesByMemberId(memberId, "article");
+    } 
+    
+   
 
-	
-	
+    public List<Article> getPendingArticlesByMemberId(int memberId) {
+        return articleDao.getPendingArticlesByMemberId(memberId);
+    }
+
+
 
 }

@@ -7,8 +7,8 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class LoginedMember {
-    private int id;
-    private int authLevel;
-    private String nickname;
+public class Admin {
+	private int memberId;
+	private String relTypeCode;
+	private int relId;
 }
