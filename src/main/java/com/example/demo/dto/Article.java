@@ -64,6 +64,7 @@ public class Article {
 	private LocalDate deadline;
 	private List<FileDto> files;
 	private int replyCount;
+	private String fileName;
 
 
 

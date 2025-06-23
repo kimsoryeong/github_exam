@@ -85,19 +85,10 @@ public class MemberService {
 	    return memberDao.getPendingInstitutions();
 	}
 
-	public void saveWorkCertFile(int memberId, MultipartFile file) {
-	    try {
-	        String savedName = fileService.saveFile(file, "member", memberId);
-	        updateWorkChkFile(memberId, savedName); 
-	    } catch (IOException e) {
-	        e.printStackTrace();
-	    }
-	}
-
-
 	public void updateWorkChkFile(int memberId, String savedName) {
 	    memberDao.updateWorkChkFile(memberId, savedName);
 	}
+
 
 	
 

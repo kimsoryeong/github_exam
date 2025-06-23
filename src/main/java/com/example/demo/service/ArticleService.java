@@ -149,6 +149,10 @@ public class ArticleService {
 	}
 
 
+	public void reuploadFile(int articleId, String fileName) {
+	    articleDao.updateReuploadFile(articleId, fileName);
+	}
+
 
    
 

@@ -19,18 +19,26 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.example.demo.dto.Article;
 import com.example.demo.dto.FileDto;
+import com.example.demo.service.ArticleService;
 import com.example.demo.service.FileService;
+import com.example.demo.service.MemberService;
 import com.example.demo.util.Util;
 
 
 @Controller
 public class FileController {
 	private FileService fileService;
+	private MemberService memberService;
+	private ArticleService articleService;
 	
 	
-	public FileController(FileService fileService) {
+	public FileController(FileService fileService,MemberService memberService, ArticleService articleService ) {
 		this.fileService = fileService;
+		this.memberService = memberService;
+		this.articleService = articleService;
+		
 	}
 	
 	@PostMapping("/usr/file/upload")
@@ -127,6 +135,26 @@ public class FileController {
 	     fileService.deleteFileById(fileId);  
 
 	     return "redirect:/usr/article/modify?id=" + articleId;  
+	 }
+
+	 @PostMapping("/usr/file/reupload")
+	 @ResponseBody
+	 public String reupload(@RequestParam("file") MultipartFile file,
+	                        @RequestParam String type,
+	                        @RequestParam(required = false) Integer memberId,
+	                        @RequestParam(required = false) Integer articleId) throws IOException {
+	     if ("member".equals(type) && memberId != null) {
+	         String fileName = fileService.saveFile(file, "member", memberId);
+	         memberService.updateWorkChkFile(memberId, fileName);
+	         memberService.updateApproveStatus(memberId, 0);
+	     }
+
+	     if ("article".equals(type) && articleId != null) {
+	         String fileName = fileService.saveFile(file, "article", articleId);
+	         articleService.reuploadFile(articleId, fileName);
+	     }
+
+	     return Util.jsReplace("파일이 재업로드 되었습니다. 승인을 기다려주세요.", "/usr/member/myPage");
 	 }
 
 

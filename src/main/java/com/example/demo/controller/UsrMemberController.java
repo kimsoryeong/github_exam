@@ -173,36 +173,6 @@ public class UsrMemberController {
 	    return "usr/member/myPage";
 	}
 	
-	@GetMapping("/usr/member/reupload")
-	public String showReuploadForm(Model model) {
-	    LoginedMember loginedMember = req.getLoginedMember();
-	    if (loginedMember == null) {
-	        return "redirect:/usr/member/login";
-	    }
-
-	    model.addAttribute("member", memberService.getMemberById(loginedMember.getId()));
-	    return "usr/member/reupload"; 
-	}
-
-	@PostMapping("/usr/member/reupload")
-	public String doReupload(@RequestParam("workCertFile") MultipartFile file) throws IOException {
-	    LoginedMember loginedMember = req.getLoginedMember();
-	    if (loginedMember == null) {
-	        return "redirect:/usr/member/login";
-	    }
-
-	    memberService.saveWorkCertFile(loginedMember.getId(), file);
-	    memberService.updateApproveStatus(loginedMember.getId(), 0); 
-	    return "redirect:/usr/member/myPage"; 
-	}
-
-	
-
-
-
-	
-	
-
 
 
 

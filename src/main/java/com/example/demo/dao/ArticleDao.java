@@ -56,7 +56,8 @@ public interface ArticleDao {
 		            phoneNumber = #{phoneNumber},
 		            hireSalary = #{hireSalary},
 		            reviewStatus = #{reviewStatus},
-		            deadline = #{deadline}
+		            deadline = #{deadline},
+		            fileName = #{fileName}
 		""")
 	@Options(useGeneratedKeys = true, keyProperty = "id")
 	int writeArticle(Article article);
@@ -134,6 +135,7 @@ public interface ArticleDao {
 				a.phoneNumber,
 				a.hireSalary,
 				a.deadline,
+				a.fileName,
 			    m.loginId,
 			    m.nickname AS nickname
 			FROM article a
@@ -442,6 +444,16 @@ public interface ArticleDao {
 			""")
 			List<Article> getPendingReviews();
 
-	
+	 
+	 @Update("""
+			    UPDATE article
+			    SET 
+			        fileName = #{fileName},
+			        reviewStatus = 0,
+			        updateDate = NOW()
+			    WHERE id = #{articleId}
+			""")
+			void updateReuploadFile(@Param("articleId") int articleId, @Param("fileName") String fileName);
+
 
 }
