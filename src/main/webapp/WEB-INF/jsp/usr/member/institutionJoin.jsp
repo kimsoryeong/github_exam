@@ -61,19 +61,19 @@
 
       <div id="step2" class="hidden">
         <div class="mb-4">
-          <label class="block text-sm font-medium text-gray-700 mb-1">기관명</label>
+          <label class="block text-sm font-medium text-gray-700 mb-1">기업명</label>
           <div class="joininput flex items-center border border-gray-300 rounded-md px-3 py-2">
             <svg class="w-5 h-5 text-gray-400 mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 11c1.104 0 2-.672 2-1.5S13.104 8 12 8s-2 .672-2 1.5.896 1.5 2 1.5zM6 10V8a6 6 0 1112 0v2a2 2 0 012 2v6a2 2 0 01-2 2H6a2 2 0 01-2-2v-6a2 2 0 012-2z" />
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5.121 17.804A4 4 0 018 16h8a4 4 0 012.879 1.804M15 11a3 3 0 10-6 0 3 3 0 006 0z" />
             </svg>
-            <input type="text" id="institutionName" name="institutionName" class="w-full outline-none border-none" placeholder="기업명 입력" />
+            <input required type="text" id="nickname" name="nickname" class="w-full outline-none border-none" placeholder="기업명 입력" />
           </div>
           <div id="institutionNameChkMsg" class="mt-2 text-sm h-5 text-center"></div>
         </div>
 
         <div class="mb-4">
           <label class="block text-sm font-medium text-gray-700 mb-1">사업자등록증 첨부</label>
-          <input type="file" name="bizFile" accept=".pdf,.jpg,.jpeg,.png" class="block w-full text-sm text-gray-500
+          <input required type="file" name="bizFile" accept=".pdf,.jpg,.jpeg,.png" class="block w-full text-sm text-gray-500
               file:mr-4 file:py-2 file:px-4 file:border-0 file:text-sm file:font-semibold
               file:bg-orange-100 file:text-orange-700 hover:file:bg-orange-200
             " />
@@ -86,9 +86,9 @@
             <svg class="w-5 h-5 text-gray-400 mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-6a3 3 0 116 0v6m-6 4h6" />
             </svg>
-            <input type="text" id="institutionNumber" name="institutionNumber" class="w-full outline-none border-none" placeholder="사업자등록번호 입력 (숫자만)" />
+            <input type="text" id="institutionNumber" name="institutionNumber" required class="w-full outline-none border-none" placeholder="사업자등록번호 입력 (숫자만)" />
           </div>
-          <div id="institutionNumberChkMsg" class="mt-2 text-sm h-5 text-center"></div>
+          <div id="businessNumberChkMsg" class="mt-2 text-sm h-5 text-center"></div>
         </div>
 
         <div class="mb-6">
@@ -97,7 +97,7 @@
             <svg class="w-5 h-5 text-gray-400 mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5.121 17.804A4 4 0 018 16h8a4 4 0 012.879 1.804M15 11a3 3 0 10-6 0 3 3 0 006 0z" />
             </svg>
-            <input type="text" id="ceoName" name="ceoName" class="w-full outline-none border-none" placeholder="대표자명 입력" />
+            <input required type="text" id="ceoName" name="ceoName" class="w-full outline-none border-none" placeholder="대표자명 입력" />
           </div>
           <div id="ceoNameChkMsg" class="mt-2 text-sm h-5 text-center"></div>
         </div>
@@ -117,124 +117,196 @@
 </section>
 
 <script>
-  $(function() {
-    $('.joininput')
-      .css({'border-color': 'gray', 'border-width': '1px', 'border-style': 'solid'})
-      .on('focusin', function () {
-        $(this).css({'border-color': '#ff9d23', 'border-width': '2px', 'border-style': 'solid'});
-      })
-      .on('focusout', function () {
-        $(this).css({'border-color': 'gray', 'border-width': '1px', 'border-style': 'solid'});
+$(function() {
+  $('.joininput')
+    .css({'border-color': 'gray', 'border-width': '1px', 'border-style': 'solid'})
+    .on('focusin', function () {
+      $(this).css({'border-color': '#ff9d23', 'border-width': '2px', 'border-style': 'solid'});
+    })
+    .on('focusout', function () {
+      $(this).css({'border-color': 'gray', 'border-width': '1px', 'border-style': 'solid'});
+    });
+
+  const loginIdInput = $('#loginId');
+  const msgEl = $('#loginIdChkMsg');
+  const dupMsgEl = $('#loginIdDupChkMsg');
+  let validLoginId = null;
+
+  function validateLoginId(loginId) {
+    return /^[a-z0-9]{5,20}$/.test(loginId);
+  }
+
+  function setErrorMessage(element, message) {
+    element.text(message).removeClass('text-green-500').addClass('text-red-500');
+  }
+
+  function clearErrorMessage(element) {
+    element.text('').removeClass('text-red-500 text-green-500');
+  }
+
+  function setSuccessMessage(element, message) {
+    element.text(message).removeClass('text-red-500').addClass('text-green-500');
+  }
+
+  async function checkLoginIdDuplication(val) {
+    try {
+      const data = await $.ajax({
+        url: '/usr/member/loginIdDupChk',
+        type: 'GET',
+        data: { loginId: val },
+        dataType: 'json'
       });
+      return data;
+    } catch (error) {
+      console.log(error);
+      return null;
+    }
+  }
 
-    $('#nextStepBtn').click(function() {
-      if (!validateStep1()) return; 
-      $('#step1').hide();
-      $('#step2').show();
-    });
+  loginIdInput.on('input', async function() {
+    const val = $(this).val().trim();
 
-    $('#prevStepBtn').click(function() {
-      $('#step2').hide();
-      $('#step1').show();
-    });
-
-    const loginIdInput = $('#loginId');
-    const msgEl = $('#loginIdChkMsg');
-    const dupMsgEl = $('#loginIdDupChkMsg');
-    let validLoginId = null;
-
-    function validateLoginId(loginId) {
-      return /^[a-z0-9]{5,20}$/.test(loginId);
+    if (val.length === 0) {
+      setErrorMessage(msgEl, '아이디는 필수 입력 정보입니다');
+      dupMsgEl.text('');
+      validLoginId = null;
+      return;
     }
 
-    function setErrorMessage(element, message) {
-      element.text(message).removeClass('text-green-500').addClass('text-red-500');
+    if (!validateLoginId(val)) {
+      setErrorMessage(msgEl, '아이디는 5~20자의 영문 소문자, 숫자만 가능합니다');
+      dupMsgEl.text('');
+      validLoginId = null;
+      return;
     }
 
-    function clearErrorMessage(element) {
-      element.text('').removeClass('text-red-500 text-green-500');
+    clearErrorMessage(msgEl);
+
+    const data = await checkLoginIdDuplication(val);
+    if (data === null) {
+      dupMsgEl.text('');
+      validLoginId = null;
+      return;
     }
 
-    function setSuccessMessage(element, message) {
-      element.text(message).removeClass('text-red-500').addClass('text-green-500');
-    }
-
-    async function checkLoginIdDuplication(val) {
-      try {
-        const data = await $.ajax({
-          url: '/usr/member/loginIdDupChk',
-          type: 'GET',
-          data: { loginId: val },
-          dataType: 'json'
-        });
-        return data;
-      } catch (error) {
-        console.log(error);
-        return null;
-      }
-    }
-
-    loginIdInput.on('input', async function() {
-      const val = $(this).val().trim();
-
-      if (val.length === 0) {
-        setErrorMessage(msgEl, '아이디는 필수 입력 정보입니다');
-        dupMsgEl.text('');
-        validLoginId = null;
-        return;
-      }
-
-      if (!validateLoginId(val)) {
-        setErrorMessage(msgEl, '아이디는 5~20자의 영문 소문자, 숫자만 가능합니다');
-        dupMsgEl.text('');
-        validLoginId = null;
-        return;
-      }
-
-      clearErrorMessage(msgEl);
-
-      const data = await checkLoginIdDuplication(val);
-      if (data === null) {
-        dupMsgEl.text('');
-        validLoginId = null;
-        return;
-      }
-
-      if (data.success) {
-        setSuccessMessage(dupMsgEl, data.rsMsg);
-        validLoginId = val;
-      } else {
-        setErrorMessage(dupMsgEl, data.rsMsg);
-        validLoginId = null;
-      }
-    });
-
-    function validateStep1() {
-      const val = loginIdInput.val().trim();
-
-      if (val.length === 0) {
-        alert('아이디를 입력해주세요');
-        loginIdInput.focus();
-        return false;
-      }
-
-      if (!validateLoginId(val)) {
-        alert('아이디는 5~20자의 영문 소문자, 숫자만 가능합니다');
-        loginIdInput.focus();
-        return false;
-      }
-
-      if (val !== validLoginId) {
-        alert('사용할 수 없는 아이디입니다');
-        loginIdInput.focus();
-        return false;
-      }
-
-
-      return true;
+    if (data.success) {
+      setSuccessMessage(dupMsgEl, data.rsMsg);
+      validLoginId = val;
+    } else {
+      setErrorMessage(dupMsgEl, data.rsMsg);
+      validLoginId = null;
     }
   });
+
+  function getPasswordValues() {
+    return {
+      pw: $('#loginPw').val(),
+      pwChk: $('#loginPwChk').val()
+    };
+  }
+
+  function validateStep1() {
+    const val = loginIdInput.val().trim();
+    const { pw, pwChk } = getPasswordValues();
+
+    if (val.length === 0) {
+      alert('아이디를 입력해주세요');
+      loginIdInput.focus();
+      return false;
+    }
+
+    if (!validateLoginId(val)) {
+      alert('아이디는 5~20자의 영문 소문자, 숫자만 가능합니다');
+      loginIdInput.focus();
+      return false;
+    }
+
+    if (val !== validLoginId) {
+      alert('사용할 수 없는 아이디입니다');
+      loginIdInput.focus();
+      return false;
+    }
+
+    if (pw.length === 0) {
+      alert('비밀번호를 입력해주세요');
+      $('#loginPw').focus();
+      return false;
+    }
+
+    if (pw.length < 5) {
+      alert('비밀번호는 5자 이상이어야 합니다');
+      $('#loginPw').focus();
+      return false;
+    }
+
+    if (pw !== pwChk) {
+      alert('비밀번호와 비밀번호 확인이 일치하지 않습니다');
+      $('#loginPwChk').focus();
+      return false;
+    }
+
+    return true;
+  }
+
+  function validateStep2() {
+    const institutionName = $('#institutionName').val().trim();
+    const businessNumber = $('#businessNumber').val().trim();
+    const ceoName = $('#ceoName').val().trim();
+    const bizFileCount = $('input[name="bizFile"]')[0].files.length;
+
+    if (institutionName.length === 0) {
+      alert('기업명을 입력해주세요.');
+      $('#institutionName').focus();
+      return false;
+    }
+
+    if (businessNumber.length === 0) {
+      alert('사업자등록번호를 입력해주세요.');
+      $('#businessNumber').focus();
+      return false;
+    }
+
+    if (!/^\d+$/.test(businessNumber)) {
+      alert('사업자등록번호는 숫자만 입력해야 합니다.');
+      $('#businessNumber').focus();
+      return false;
+    }
+
+    if (bizFileCount === 0) {
+      alert('사업자등록증 첨부 파일을 선택해주세요.');
+      $('input[name="bizFile"]').focus();
+      return false;
+    }
+
+    if (ceoName.length === 0) {
+      alert('대표자명을 입력해주세요.');
+      $('#ceoName').focus();
+      return false;
+    }
+
+    return true;
+  }
+
+  $('#nextStepBtn').click(function() {
+    if (!validateStep1()) return;
+    $('#step1').hide();
+    $('#step2').show();
+  });
+
+  $('#prevStepBtn').click(function() {
+    $('#step2').hide();
+    $('#step1').show();
+  });
+
+  $('#institutionJoinForm').on('submit', function(e) {
+    if (!validateStep2()) {
+      e.preventDefault();
+    }
+  });
+});
 </script>
+
+
 
 
 

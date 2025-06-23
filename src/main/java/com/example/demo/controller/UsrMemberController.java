@@ -1,19 +1,18 @@
 package com.example.demo.controller;
 
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.List;
-import java.io.File;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.util.FileCopyUtils;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
+
 import com.example.demo.dto.Article;
+import com.example.demo.dto.FileDto;
 import com.example.demo.dto.LoginedMember;
 import com.example.demo.dto.Member;
 import com.example.demo.dto.Reply;
@@ -24,8 +23,6 @@ import com.example.demo.service.FileService;
 import com.example.demo.service.MemberService;
 import com.example.demo.service.ReplyService;
 import com.example.demo.util.Util;
-
-import jakarta.servlet.http.HttpServletResponse;
 
 
 @Controller
@@ -72,17 +69,18 @@ public class UsrMemberController {
 	public String doInstitutionJoin(
 	    String loginId, 
 	    String loginPw, 
-	    String institutionName, 
+	    String nickname, 
 	    String institutionNumber, 
 	    MultipartFile bizFile
 	) throws IOException {
-	    int memberId = memberService.joinInstitutionMember(loginId, loginPw, institutionName, institutionNumber);
+	    int memberId = memberService.joinInstitutionMember(loginId, loginPw, nickname, institutionNumber);
 	    
 	    if (!bizFile.isEmpty()) {
-	        fileService.saveFile(bizFile, "member", memberId);
+	        String savedName = fileService.saveFile(bizFile, "member", memberId);
+	        memberService.updateWorkChkFile(memberId, savedName); 
 	    }
 
-	    String msg = String.format("[ %s ] 님, 가입 신청이 완료되었습니다. 관리자의 승인은 로그인 후 마이페이지에서 확인할 수 있습니다.", institutionName);
+	    String msg = String.format("[ %s ] 님, 가입 신청이 완료되었습니다. 관리자의 승인은 로그인 후 마이페이지에서 확인할 수 있습니다.", nickname);
 	    return Util.jsReplace(msg, "/usr/member/myPage");
 	}
 
@@ -129,7 +127,7 @@ public class UsrMemberController {
 			return Util.jsReplace("비밀번호가 일치하지 않습니다", "login");
 		}
 		
-		this.req.login(new LoginedMember(member.getId(), member.getAuthLevel(), member.getNickname()));
+		this.req.login(new LoginedMember(member.getId(), member.getAuthLevel(), member.getNickname(), member.getApproveStatus()));
 
 		
 		return Util.jsReplace(String.format("[ %s ] 님 환영합니다", member.getLoginId()), "/");
@@ -159,6 +157,13 @@ public class UsrMemberController {
 	    List<Reply> myReplies = replyService.getReplyByMemberId(member.getId());
 	    List<Article> pendingArticleList = articleService.getPendingArticlesByMemberId(member.getId());
 
+	    FileDto workChkFile = null;
+	    if (member.getWorkChkFileId() != null) {
+	        workChkFile = fileService.getFileById(member.getWorkChkFileId());
+	    }
+
+	    model.addAttribute("workChkFile", workChkFile);
+
 	    model.addAttribute("myArticles", myArticles);
 	    model.addAttribute("member", member);
 	    model.addAttribute("likedArticles", likedArticleList);
@@ -168,25 +173,37 @@ public class UsrMemberController {
 	    return "usr/member/myPage";
 	}
 	
-	@GetMapping("/usr/member/file/view/{fileName:.+}")
-	@ResponseBody
-	public void viewWorkChkFile(
-	    @PathVariable String fileName, HttpServletResponse response
-	) throws IOException {
-	    String filePath = "D:/ksr/working_upload/" + fileName;
-	    File file = new File(filePath);
-
-	    if (!file.exists()) {
-	        response.setStatus(HttpServletResponse.SC_NOT_FOUND);
-	        return;
+	@GetMapping("/usr/member/reupload")
+	public String showReuploadForm(Model model) {
+	    LoginedMember loginedMember = req.getLoginedMember();
+	    if (loginedMember == null) {
+	        return "redirect:/usr/member/login";
 	    }
 
-	    response.setContentType("application/octet-stream");
-	    try (FileInputStream fis = new FileInputStream(file)) {
-	        FileCopyUtils.copy(fis, response.getOutputStream());
-	    }
+	    model.addAttribute("member", memberService.getMemberById(loginedMember.getId()));
+	    return "usr/member/reupload"; 
 	}
+
+	@PostMapping("/usr/member/reupload")
+	public String doReupload(@RequestParam("workCertFile") MultipartFile file) throws IOException {
+	    LoginedMember loginedMember = req.getLoginedMember();
+	    if (loginedMember == null) {
+	        return "redirect:/usr/member/login";
+	    }
+
+	    memberService.saveWorkCertFile(loginedMember.getId(), file);
+	    memberService.updateApproveStatus(loginedMember.getId(), 0); 
+	    return "redirect:/usr/member/myPage"; 
+	}
+
+	
+
+
+
+	
+	
+
+
 
 
 }
-

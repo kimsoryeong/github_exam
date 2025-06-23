@@ -1,5 +1,6 @@
 package com.example.demo.dto;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -13,14 +14,14 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class Article {
     private int id;
-    private String regDate;
-    private String updateDate;
+    private LocalDate regDate;
+    private LocalDate updateDate;
     private String institutionName;
     private String institutionComment;
     private String boardName;
     private int boardId;
     private int memberId;
-    private String writerName;
+    private String nickname;
     private String searchType;
     private String keyword;
     private String city;
@@ -56,6 +57,14 @@ public class Article {
 	private int views;
 	private int reviewStatus;
 	private String rejectReason;
+	private String title;
+	private String content;
+	private String phoneNumber;
+	private String hireSalary;
+	private LocalDate deadline;
+	private List<FileDto> files;
+	private int replyCount;
+
 
 
     public void setWelfareOptionsStr(String welfareOptionsStr) {
@@ -93,4 +102,5 @@ public class Article {
     public int getInterviewScore() {
         return interviewScore;
     }
+	
 }

@@ -16,13 +16,7 @@
       <c:set var="isLogined" value="${req.getLoginedMember().getId() != 0}" />
       <c:set var="authLevel" value="${req.getLoginedMember().getAuthLevel()}" />
       <c:set var="boardId" value="${board.getId()}" />
-      <c:if test="${isLogined && (authLevel == 0 || boardId != 10)}">
-        <button
-          class="bg-orange-400 hover:bg-orange-500 text-white px-5 py-2 rounded-lg font-semibold shadow transition"
-          onclick="location.href='/usr/article/mainWrite?boardId=${boardId}'">
-          글쓰기
-        </button>
-      </c:if>
+    
     </div>
 
     <div class="flex flex-col md:flex-row gap-4">
@@ -43,7 +37,6 @@
       </aside>
 
       <div class="flex-1 min-w-0">
-       
 		<div id="sectionMyInformation" class="bg-white rounded-lg shadow px-4 py-6 mb-5">
 		  <div></div>
 		  <h2 class="text-xl font-semibold mb-4">
@@ -55,22 +48,51 @@
 		  </c:if>
 		  <c:if test="${authLevel == 2}">
 		  <div class="text-gray-500">아이디 : ${member.loginId}</div>
-		  <div class="text-gray-500">기관명 : ${member.institutionName}</div>
+		  <div class="text-gray-500">기관명 : ${member.nickname}</div>
 		  <div class="text-gray-500">기관번호 : ${member.institutionNumber}</div>
+		  <div class="text-gray-500">사업자등록증
+			<c:choose>
+			  <c:when test="${not empty member.workChkFile}">
+			    <a href="/usr/member/file/view/${member.workChkFile}" target="_blank">[ 보기 ]</a>
+			  </c:when>
+			  <c:otherwise>
+			    <span class="text-gray-400 text-sm">첨부된 파일이 없습니다</span>
+			  </c:otherwise>
+			</c:choose>
+            </div>
 		  <div class="text-gray-500">가입 승인 상태 :
 		  <c:if test="${member.approveStatus == 0}">
             <span class="px-2 py-1 bg-yellow-200 text-yellow-800 rounded-full text-sm">승인 대기 중</span>
             <span class="px-2 py-1  rounded-full text-sm">관리자의 승인 후 게시글 및 댓글 작성이 가능합니다.</span>
           </c:if>
-            <div>사업자등록증 ${member.workChkFile} 
-              <a href="/usr/article/file/view/${member.workChkFile}" target="_blank">[ 보기 ]</a>
-
-            </div>
+		  <c:if test="${member.approveStatus == 1}">
+            <span class="px-2 py-1 bg-green-200 text-green-800 rounded-full text-sm">승인 완료</span>
+          </c:if>
+		  <c:if test="${member.approveStatus == 2}">
+			  <span class="px-2 py-1 bg-red-200 text-red-800 rounded-full text-sm">반려</span>
+			  <span class="px-2 py-1 text-red-500 rounded-full text-sm">반려사유 : ${member.rejectReason}</span>
+			  <form id="reuploadForm" method="post" enctype="multipart/form-data"
+			      action="/usr/member/reupload" onsubmit="return submitReuploadForm()">
+			  <input type="hidden" name="memberId" value="${member.id}" />
+			  <label for="workCertFile" class="block text-sm pt-2 font-medium text-gray-500 mb-1">
+			    사업자등록증 재업로드:
+			  </label>
+			  <label for="workCertFile"
+			         class="inline-block cursor-pointer bg-gray-100 text-gray-700 font-semibold py-1 px-4 rounded hover:bg-gray-200 text-sm">
+			    파일 선택 
+			  </label>
+			  <span id="fileName" class="ml-2 text-sm text-gray-600">선택된 파일 없음</span>
+			  <input type="file" name="workCertFile" id="workCertFile"
+			         accept=".pdf,.jpg,.jpeg,.png" class="hidden" />
+			  <button type="submit"
+			          class="ml-2 px-3 py-1 bg-orange-100 text-orange-700 font-semibold rounded hover:bg-orange-200 text-sm transition">
+			    재업로드
+			  </button>
+			</form>
+			</c:if>
 		  </div>
 		  </c:if>
 		</div>
-
-		
 		<div id="sectionMyArticles" class="bg-white rounded-lg shadow p-4 mb-5">
 		  <h2 class="text-xl font-semibold mb-4"><i class="fas fa-pencil-alt text-orange-400 mr-2"></i>내가 작성한 글</h2>
 		  <c:forEach var="article" items="${myArticles}">
@@ -90,18 +112,35 @@
 		            <span class="px-2 py-1 bg-green-200 text-green-800 rounded-full text-sm">승인 완료</span>
 		          </c:when>
 		          <c:when test="${article.reviewStatus == 2}">
-		            <span class="px-2 py-1 bg-red-200 text-red-800 rounded-full text-sm">반려됨</span>
+		            <span class="px-2 py-1 bg-red-200 text-red-800 rounded-full text-sm">반려</span>
 		          </c:when>
 		          <c:otherwise>
 		            <span class="px-2 py-1 bg-gray-200 text-gray-700 rounded-full text-sm">상태 없음</span>
 		          </c:otherwise>
 		        </c:choose>
-		      </c:if>
-		  </div>
-		</div>
-		
+			      </c:if>
+			  </div>
+			</div>
 		      <c:if test="${article.boardName eq '근무 리뷰' and  article.reviewStatus eq 2}">
 		        <div class="mb-2 text-red-600 text-sm">반려 사유: ${article.rejectReason}</div>
+		        <form id="reuploadForm" method="post" enctype="multipart/form-data"
+			      action="/usr/member/reupload" onsubmit="return submitReuploadForm()">
+				  <input type="hidden" name="memberId" value="${member.id}" />
+				  <label for="workCertFile" class="block text-sm pt-2 font-medium text-gray-500 mb-1">
+				    재직증빙자료 재업로드:
+				  </label>
+				  <label for="workCertFile"
+				         class="inline-block cursor-pointer bg-gray-100 text-gray-700 font-semibold py-1 px-4 rounded hover:bg-gray-200 text-sm">
+				    파일 선택 
+				  </label>
+				  <span id="fileName" class="ml-2 text-sm text-gray-600">선택된 파일 없음</span>
+				  <input type="file" name="workCertFile" id="workCertFile"
+				         accept=".pdf,.jpg,.jpeg,.png" class="hidden" />
+				  <button type="submit"
+				          class="ml-2 px-3 py-1 bg-orange-100 text-orange-700 font-semibold rounded hover:bg-orange-200 text-sm transition">
+				    재업로드
+				  </button>
+				</form>
 		      </c:if>
 		      <c:if test="${article.boardName != '근무 리뷰' or (article.reviewStatus eq 1)}">
 		      <a href="/usr/article/detail?id=${article.id}" 
@@ -194,6 +233,21 @@
 </section>
 
 <script>
+const fileInput = document.getElementById("workCertFile");
+const fileNameDisplay = document.getElementById("fileName");
+
+fileInput.addEventListener("change", function () {
+  const fileName = this.files.length > 0 ? this.files[0].name : "선택된 파일 없음";
+  fileNameDisplay.textContent = fileName;
+});
+
+function submitReuploadForm() {
+  if (!fileInput.files.length) {
+    alert("파일을 선택해주세요.");
+    return false;
+  }
+  return true;
+}
   function showSection(sectionId) {
     const sections = ['sectionMyInformation', 'sectionMyArticles', 'sectionLikedArticles', 'sectionPendingArticles', 'sectionMyReplies'];
 

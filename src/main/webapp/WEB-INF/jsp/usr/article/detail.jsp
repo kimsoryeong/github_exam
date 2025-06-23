@@ -1,6 +1,8 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8"
 	pageEncoding="UTF-8"%>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
+<%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
+
 <c:set var="pageTitle" value="상세보기" />
 <%@ include file="/WEB-INF/jsp/common/header.jsp"%>
 <%@ include file="/WEB-INF/jsp/common/topbar.jsp"%>
@@ -12,13 +14,13 @@
 		  <hr/>
 		  <h3>첨부파일</h3>
 		  <c:forEach var="file" items="${files}">
-		  <a href="/usr/article/file/view/${file.savedName}" target="_blank">
+		  <a href="${pageContext.request.contextPath}/usr/member/file/view/${file.savedName}" target="_blank">
+
 		    ▶ ${file.originName} (클릭해서 미리보기)
 		  </a>
 		</c:forEach>
-		 
 		</c:if>
-		<div class="bg-white rounded-2xl shadow-xl p-8 space-y-6">
+		<div class="bg-white rounded-2xl shadow-xl p-8  space-y-6">
 		
 			<div class="flex items-center gap-4 border-b pb-4">
 				<i class="fa-solid fa-school fa-2xl text-orange-400 pr-4"></i> <span
@@ -118,6 +120,7 @@
 				    <jsp:param name="relTypeCode" value="${relTypeCode}" />
 				    <jsp:param name="relId" value="${relId}" />
 				</jsp:include>
+				</div>
 			</c:if>
 
 	<c:if test="${board.boardName eq '면접 리뷰'}">
@@ -209,7 +212,7 @@
 			</c:if>
 
 
-		<c:if test="${board.boardName eq '실습 및 봉사 리뷰'}">
+	<c:if test="${board.boardName eq '실습 및 봉사 리뷰'}">
 		<jsp:include page="/WEB-INF/jsp/common/articleHeader.jsp" />
 		
 				<div class="flex items-center gap-4 border-b pb-4">
@@ -278,31 +281,139 @@
 				    <jsp:param name="relId" value="${relId}" />
 				</jsp:include>
 				</c:if>
-			</section>
-
-<style>
-.hidden { display: none; }
-</style>
+		<c:if test="${board.id == 3 or  board.id == 10 or board.id == 11 or board.id == 12}">
+			<jsp:include page="/WEB-INF/jsp/common/articleHeader.jsp" />
+				<div class="flex justify-between text-orange-500 ml-auto">
+					<span class="font-bold flex justify-start">
+						[ ${article.city} ]  ${board.boardName}
+					</span>
+				</div>
+				<div class="flex justify-between items-center gap-4 border-b pb-4">
+				  <div class="flex flex-col">
+				    <span class="font-bold text-xl text-gray-800">${article.title}</span>
+				    <div class="text-sm text-gray-500">작성자 : ${article.nickname}</div>
+				  </div>
+				  <div class="flex flex-col items-end text-sm text-gray-500">
+				    <span>조회수 ${article.views}</span>
+				    <span id="replyCount">댓글수 ${article.replyCount}</span>
+				    <span class="flex items-center gap-1">
+				      추천수
+				      <c:if test="${req.getLoginedMember().getId() == 0}">
+				        <span id="likePointCnt"></span>
+				      </c:if>
+				      <c:if test="${req.getLoginedMember().getId() != 0}">
+				        <button onclick="clickLikePoint();" class="ml-1">
+				          <span id="likePointCnt"></span>
+				          <span id="likePointBtn"></span>
+				        </button>
+				      </c:if>
+				    </span>
+				    
+				  </div>
+				</div>
+				<div class="text-gray-800 pb-4">${article.content}</div>
+				<c:forEach var="file" items="${files}">
+				  <c:choose>
+				    <c:when test="${file.originName.endsWith('.jpg') 
+				                or file.originName.endsWith('.jpeg') 
+				                or file.originName.endsWith('.png') 
+				                or file.originName.endsWith('.gif')}">
+				      <img src="${pageContext.request.contextPath}/usr/member/file/view/${file.savedName}"
+				           alt="${file.originName}" style="max-width: 300px;" />
+				    </c:when>
+				    <c:otherwise>
+				      <a href="${pageContext.request.contextPath}/usr/member/file/download/${file.savedName}" target="_blank">
+						  ${file.originName} 다운로드
+						</a>
+				    </c:otherwise>
+				  </c:choose>
+				</c:forEach>
+				<jsp:include page="/WEB-INF/jsp/common/replyBox.jsp">
+				    <jsp:param name="relTypeCode" value="${relTypeCode}" />
+				    <jsp:param name="relId" value="${relId}" />
+				</jsp:include>
+			</c:if>
+				
+			<c:if test="${board.id == 9 }">
+				<jsp:include page="/WEB-INF/jsp/common/articleHeader.jsp" />
+				<div class="flex justify-between text-orange-500 ml-auto">
+					<span class="font-bold flex justify-start">
+						[ ${article.city} ]  ${board.boardName}
+					</span>
+				</div>
+				<div class="flex justify-between items-center gap-4 border-b pb-4">
+				  <div class="flex flex-col">
+				    <span class="font-bold text-xl text-gray-800">${article.title}</span>
+				    <div class="text-sm text-gray-500">${article.nickname}</div>
+				  </div>
+				  <div class="flex flex-col items-end text-sm text-gray-500">
+				    <span>조회수 ${article.views}</span>
+				    <span class="flex items-center gap-1">
+				      추천수
+				      <c:if test="${req.getLoginedMember().getId() == 0}">
+				        <span id="likePointCnt"></span>
+				      </c:if>
+				      <c:if test="${req.getLoginedMember().getId() != 0}">
+				        <button onclick="clickLikePoint();" class="ml-1">
+				          <span id="likePointCnt"></span>
+				          <span id="likePointBtn"></span>
+				        </button>
+				      </c:if>
+				    </span>
+				  </div>
+				</div>
+				<div class="flex flex-row gap-2 justify-between">
+				<div><i class="fa-solid fa-school pr-2 text-orange-500 "></i>${article.institutionName}</div>
+				<div><i class="fa-solid fa-phone pr-2 text-orange-500"></i> 전화번호 : ${article.phoneNumber}</div>
+				<div><i class="fa-solid fa-check pr-2 text-orange-500"></i> 마감일 : ${article.deadline}</div>
+				</div>
+				<div class="flex flex-row gap-2 justify-between border-b pb-4 ">
+				<div><i class="fa-solid fa-location-dot pr-2 text-orange-500"></i>근무지역 : ${article.city}</div>
+				<div><i class="fa-regular fa-user pr-2 text-orange-500"></i>구인 직종 : ${article.workType}</div>
+				<div><i class="fa-solid fa-briefcase pr-2 text-orange-500"></i>경력사항 : ${article.personalHistory}</div>
+				<div><i class="fa-solid fa-sack-dollar pr-2 text-orange-500"></i> 급여 : ${article.hireSalary}</div>
+				</div>
+				<div class="text-gray-800">${article.content}</div>
+				<div class= "pb-20">
+				<c:forEach var="file" items="${files}">
+				  <c:choose>
+				    <c:when test="${file.originName.endsWith('.jpg') 
+				                or file.originName.endsWith('.jpeg') 
+				                or file.originName.endsWith('.png') 
+				                or file.originName.endsWith('.gif')}">
+				      <img src="${pageContext.request.contextPath}/usr/member/file/view/${file.savedName}"
+				           alt="${file.originName}" style="max-width: 300px;" />
+				    </c:when>
+				    <c:otherwise>
+				      <a href="${pageContext.request.contextPath}/usr/member/file/download/${file.savedName}" target="_blank">
+						  ${file.originName} 다운로드
+						</a>
+				    </c:otherwise>
+				  </c:choose>
+				</c:forEach>
+				</div>
+			</c:if>
+		</section>
 
 <script>
-		$(function(){
-			getLikePoint();
+	$(function(){
+		getLikePoint();
+	})
+
+	const clickLikePoint = async function () {
+		let likePointBtn = $('#likePointBtn > i').hasClass('fa-solid');
+		
+		await $.ajax({
+			url : '/usr/likePoint/clickLikePoint',
+			type : 'GET',
+			data : {
+				relTypeCode : 'article',
+				relId : ${article.getId() },
+				likePointBtn : likePointBtn
+			},
 		})
-	
-		const clickLikePoint = async function () {
-			let likePointBtn = $('#likePointBtn > i').hasClass('fa-solid');
-			
-			await $.ajax({
-				url : '/usr/likePoint/clickLikePoint',
-				type : 'GET',
-				data : {
-					relTypeCode : 'article',
-					relId : ${article.getId() },
-					likePointBtn : likePointBtn
-				},
-			})
-			await getLikePoint();
-		}
+		await getLikePoint();
+	}
 		
 		const getLikePoint = function () {
 			$.ajax({
@@ -327,9 +438,6 @@
 				}
 			})
 		}
-
-		
-
 		
 	</script>
 

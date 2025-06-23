@@ -19,4 +19,16 @@ public class Reply {
 	private Boolean isSecret;
 	private Boolean isAnonymous;
 	private int parentId;
+
+	public boolean isSecret() {
+        return isSecret;
+    }
+
+    public void setSecret(boolean isSecret) {
+        this.isSecret = isSecret;
+    }
+    
+    public class ReplyCountDto {
+        private int count;
+    }
 }

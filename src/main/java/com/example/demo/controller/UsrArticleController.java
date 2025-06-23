@@ -1,42 +1,40 @@
 package com.example.demo.controller;
 
-import java.io.File;
+
 import java.io.IOException;
-import java.net.MalformedURLException;
-import java.nio.file.Files;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
 
-import org.springframework.core.io.Resource;
-import org.springframework.core.io.UrlResource;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.example.demo.dto.Article;
+import com.example.demo.dto.ArticleModifyDTO;
 import com.example.demo.dto.Board;
 import com.example.demo.dto.FileDto;
 import com.example.demo.dto.LoginedMember;
+import com.example.demo.dto.Member;
 import com.example.demo.dto.Reply;
 import com.example.demo.dto.Req;
 import com.example.demo.service.ArticleService;
 import com.example.demo.service.BoardService;
 import com.example.demo.service.FileService;
+import com.example.demo.service.MemberService;
 import com.example.demo.service.ReplyService;
 import com.example.demo.util.Util;
 
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 
 @Controller
 public class UsrArticleController {
@@ -46,13 +44,15 @@ public class UsrArticleController {
 	private Req req;
 	private ReplyService replyService;
 	private final FileService fileService;
+	private final MemberService memberService;
 	
-	public UsrArticleController(ArticleService articleService, BoardService boardService, Req req, ReplyService replyService, FileService fileService) {
+	public UsrArticleController(ArticleService articleService, BoardService boardService, Req req, ReplyService replyService, FileService fileService, MemberService memberService) {
 		this.articleService = articleService;
 		this.replyService = replyService;
 		this.boardService = boardService;
 		this.req = req;
 		this.fileService = fileService;
+		this.memberService = memberService;
 	}
 	
 	@GetMapping("/usr/article/mainWrite")
@@ -65,8 +65,9 @@ public class UsrArticleController {
 	@PostMapping("/usr/article/doWrite")
 	@ResponseBody
 	public String doWrite(
-	    @RequestParam String institutionName,
+		@RequestParam(required = false) String institutionName,
 	    @RequestParam(required = false) String institutionComment,
+	    @RequestParam(required = false) String nickname,
 	    @RequestParam String boardName,
 	    @RequestParam(required = false) Integer salaryScore,
 	    @RequestParam(required = false) Integer welfareScore,
@@ -95,6 +96,12 @@ public class UsrArticleController {
 	    @RequestParam(required = false) String practiceAtmosphere,
 	    @RequestParam(required = false) String practiceExperience,
 	    @RequestParam(required = false) String practiceReview,
+	    @RequestParam(required = false) String title,
+	    @RequestParam(required = false) String content,
+	    @RequestParam(required = false) String phoneNumber,
+	    @RequestParam(required = false) String hireSalary,
+	    @RequestParam(required = false) String communityBoard,
+	    @RequestParam(required = false) LocalDate deadline,
 	    @RequestParam(required = false) MultipartFile workCertFile
 	) throws IOException {
 	    int memberId = this.req.getLoginedMember().getId();
@@ -107,6 +114,13 @@ public class UsrArticleController {
 	    article.setWorkType(workType);
 	    article.setCity(city);
 	    article.setInstitutionType(institutionType);
+	    article.setTitle(title);
+	    article.setContent(content);
+	    article.setPhoneNumber(phoneNumber);
+	    article.setHireSalary(hireSalary);
+	    article.setNickname(nickname);
+	    article.setPersonalHistory(personalHistory);
+	    article.setDeadline(deadline);
 
 	    if ("근무 리뷰".equals(boardName)) {
 	        article.setSalaryScore(salaryScore != null ? salaryScore : 0);
@@ -116,10 +130,8 @@ public class UsrArticleController {
 	        article.setWelfareComment(welfareComment);
 	        article.setEnvironmentComment(environmentComment);
 	        article.setCommuteTimeComment(commuteTimeComment);
-
 	        article.setSalaryOptions(salaryOptions);
 	        article.setWelfareOptions(welfareOptions);
-
 	        article.setSalaryOptionsStr(
 	            (salaryOptions != null && !salaryOptions.isEmpty()) ? String.join(",", salaryOptions) : null
 	        );
@@ -136,6 +148,7 @@ public class UsrArticleController {
 	        article.setInterviewTip(interviewTip);
 	        article.setInterviewCompleted(interviewCompleted);
 	        article.setInterviewResults(interviewResults);
+	        
 	    } else if ("실습 및 봉사 리뷰".equals(boardName)) {
 	        article.setPracticeScore(practiceScore != null ? practiceScore : 0);
 	        article.setPracticeComment(practiceComment);
@@ -145,13 +158,17 @@ public class UsrArticleController {
 	        article.setPracticeReview(practiceReview);
 	    }
 
+	    article.setReviewStatus(0);  
 	    int articleId = this.articleService.writeArticle(article);
 
-	    if ("근무 리뷰".equals(boardName) && workCertFile != null && !workCertFile.isEmpty()) {
+	    if (workCertFile != null && !workCertFile.isEmpty()) {
 	        fileService.saveFile(workCertFile, "article", articleId);
 	    }
-	    article.setReviewStatus(0);  
 
+
+	    if(boardName == null || boardName.trim().isEmpty()) {
+	        return Util.jsReplace("게시판을 선택해 주세요.", "back");
+	    }
 
 	    if ("근무 리뷰".equals(boardName)) {
 	        return Util.jsReplace("관리자의 승인 후 게시글이 등록됩니다.", "/usr/member/myPage");
@@ -161,35 +178,6 @@ public class UsrArticleController {
 	}
 
 
-	@GetMapping("/usr/article/file/view/{fileName:.+}")
-	@ResponseBody
-	public ResponseEntity<Resource> viewFile(@PathVariable String fileName) throws IOException {
-	    String filePath = fileService.getFullPath(fileName);
-	    File file = new File(filePath);
-
-	    System.out.println("파일경로 :" + filePath);
-
-	    if (!file.exists()) {
-	        return ResponseEntity.notFound().build();
-	    }
-
-	    UrlResource resource;
-	    try {
-	        resource = new UrlResource(file.toURI().toURL());
-	    } catch (MalformedURLException e) {
-	        throw new RuntimeException("URL 생성 실패: " + file.getAbsolutePath(), e);
-	    }
-
-	    String contentType = Files.probeContentType(file.toPath());
-	    if (contentType == null) {
-	        contentType = "application/octet-stream"; // 기본값
-	    }
-
-	    return ResponseEntity.ok()
-	            .contentType(MediaType.parseMediaType(contentType))
-	            .header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"" + file.getName() + "\"")
-	            .body(resource);
-	}
 
 	@GetMapping("/usr/article/interviewWrite")
 	public String interviewWrite() {
@@ -197,8 +185,57 @@ public class UsrArticleController {
 	}
 
 	@GetMapping("/usr/article/hireWrite")
-	public String hireWrite() {
-		return "usr/article/hireWrite";
+	@ResponseBody
+	public String hireWrite(HttpSession session) {
+		
+		LoginedMember loginedMember = (LoginedMember) session.getAttribute("loginedMember");
+
+		 if (loginedMember == null) {
+		        return Util.jsReplace("로그인이 필요합니다", "/usr/member/login");
+		    }
+
+		 Member freshMember = memberService.getMemberById(loginedMember.getId());
+		 LoginedMember refreshedLoginedMember = new LoginedMember(
+	        freshMember.getId(),
+	        freshMember.getAuthLevel(),
+	        freshMember.getNickname(),
+	        freshMember.getApproveStatus()
+	    );
+	    session.setAttribute("loginedMember", refreshedLoginedMember);
+
+	    if (freshMember.getAuthLevel() == 0 || (freshMember.getAuthLevel() == 2 && freshMember.getApproveStatus() == 1)) {
+	        return Util.jsReplace("", "/usr/article/hireWritePage");
+	    } else {
+	        return Util.jsReplace("관리자의 승인 후 작성 가능합니다", "/");
+	    }
+	}
+	
+	@GetMapping("/usr/article/hireWritePage")
+	public String hireWritePage(Model model) {
+		Article article = new Article(); 
+		model.addAttribute("article", article);
+	    return "usr/article/hireWrite"; 
+	}
+	
+	@GetMapping("/usr/article/communityWrite")
+	@ResponseBody
+	public String communityWrite(HttpSession session) {
+	    LoginedMember loginedMember = (LoginedMember) session.getAttribute("loginedMember");
+
+	    if (loginedMember == null) {
+	        return Util.jsReplace("로그인이 필요합니다", "/usr/member/login");
+	    }
+
+	    if (loginedMember.getAuthLevel() == 2) {
+	        return Util.jsReplace("글 작성 권한이 없습니다", "/");
+	    }
+
+	    return Util.jsReplace("", "/usr/article/communityWritePage");
+	}
+
+	@GetMapping("/usr/article/communityWritePage")
+	public String communityWritePage() {
+	    return "usr/article/communityWrite"; 
 	}
 	
 	@GetMapping("/usr/article/practiceWrite")
@@ -211,7 +248,6 @@ public class UsrArticleController {
 	    model.addAttribute("article", new Article());
 	    return "usr/article/workingWrite";
 	}
-
 	
 	@GetMapping("/usr/article/detail")
 	public String detail(HttpServletRequest request, HttpServletResponse response, Model model, int id) {
@@ -236,7 +272,8 @@ public class UsrArticleController {
 	        response.addCookie(cookie);
 	    }
 
-	    Article article = articleService.getArticleById(id);
+	    Article article = articleService.getArticleByIdWithFiles(id);
+	    
 	    if ("근무 리뷰".equals(article.getBoardName()) && article.getReviewStatus() != 1) {
 	        return "common/notAuthorized";
 	    }
@@ -244,16 +281,19 @@ public class UsrArticleController {
 
 	    List<String> salaryOptions = articleService.getOptions(id, "salary");
 	    List<String> welfareOptions = articleService.getOptions(id, "welfare");
-	    List<Reply> replies = this.replyService.getReplies("article", id);
+
+	    int memberId = ((Req) request.getAttribute("req")).getLoginedMember().getId(); 
+	    List<Reply> replies = replyService.getReplies("article", id, memberId);
+	    
+	    replies = replyService.getReplies("article", id, memberId);
 
 	    salaryOptions = new ArrayList<>(new LinkedHashSet<>(salaryOptions));
 	    welfareOptions = new ArrayList<>(new LinkedHashSet<>(welfareOptions));
 
 	    article.calculateStar();
-
 	    model.addAttribute("article", article);
 	    model.addAttribute("board", board);
-	    model.addAttribute("replies", replies);
+	    model.addAttribute("replies", replies);  
 	    model.addAttribute("relId", id);
 	    model.addAttribute("relTypeCode", "article");
 	    model.addAttribute("salaryOptions", salaryOptions);
@@ -265,11 +305,13 @@ public class UsrArticleController {
 	        authLevel = req.getLoginedMember().getAuthLevel();
 	    }
 	    model.addAttribute("isAdmin", authLevel == 0);
+	    
+	    int replyCount = articleService.getReplyCountByArticleId(article.getId());
+	    article.setReplyCount(replyCount);
 
-	    if (authLevel == 0) {
-	        List<FileDto> files = fileService.getFilesByRel("article", id);
-	        model.addAttribute("files", files);
-	    }
+	    
+	    List<FileDto> files = fileService.getFilesByRel("article", id);
+	    model.addAttribute("files", files);
 
 	    return "usr/article/detail";
 	}
@@ -305,6 +347,11 @@ public class UsrArticleController {
 	        articlesCnt = articleService.getArticlesCnt(boardId, city);
 	    }
 
+	    for (Article article : articles) {
+	        int replyCount = articleService.getReplyCountByArticleId(article.getId());
+	        article.setReplyCount(replyCount);
+	    }
+	    
 	    int totalPagesCnt = (int) Math.ceil(articlesCnt / (double) articlesInPage);
 	    int begin = ((cPage - 1) / 10) * 10 + 1;
 	    int end = (((cPage - 1) / 10) + 1) * 10;
@@ -323,6 +370,8 @@ public class UsrArticleController {
 	    model.addAttribute("workingTopArticles", articleService.getTopArticlesByViews(4));
 	    model.addAttribute("interviewTopArticles", articleService.getTopArticlesByViews(5));
 	    model.addAttribute("practiceTopArticles", articleService.getTopArticlesByViews(6));
+	    model.addAttribute("freeTopArticles", articleService.getTopArticlesByViews(11));
+	    model.addAttribute("qnaTopArticles", articleService.getTopArticlesByViews(12));
 	    
 	    return "usr/article/list";
 	}
@@ -330,69 +379,37 @@ public class UsrArticleController {
 	@GetMapping("/usr/article/modify")
 	public String modify(Model model, int id) {
 	    Article article = this.articleService.getArticleById(id);
+	    List<FileDto> files = fileService.getFilesByRelId(id);  
 
 	    LoginedMember loginedMember = req.getLoginedMember();
-	    int loginedMemberId = loginedMember.getId();
-
-	    if (article == null || article.getMemberId() != loginedMemberId) {
-	        return "common/notAuthorized";
+	    if (article.getMemberId() != loginedMember.getId()) {
+	        model.addAttribute("error", "권한이 없는 페이지입니다.");
+	        return "redirect:/usr/article/list";
 	    }
 
 	    model.addAttribute("article", article);
-	    return "usr/article/modify";
+	    model.addAttribute("files", files); 
+	    return "usr/article/modify"; 
 	}
 
-	
 	@PostMapping("/usr/article/doModify")
 	@ResponseBody
-	public String doModify(
-	    String institutionName,
-	    int id,
-	    @RequestParam(required = false) String workType,
-	    @RequestParam(required = false) String city,
-	    @RequestParam(required = false) String institutionType,
-	    @RequestParam(required = false) String institutionComment,
-	    @RequestParam(required = false) List<String> salaryOptions,
-	    @RequestParam(required = false) List<String> welfareOptions,
-	    @RequestParam(required = false) String salaryComment,
-	    @RequestParam(required = false) String welfareComment,
-	    @RequestParam(required = false) String environmentComment,
-	    @RequestParam(required = false) String commuteTimeComment,
-	    @RequestParam(required = false) Integer salaryScore,
-	    @RequestParam(required = false) Integer welfareScore,
-	    @RequestParam(required = false) Integer environmentScore,
-	    @RequestParam(required = false) Integer interviewScore,
-	    @RequestParam(required = false) String interviewComment,
-	    @RequestParam(required = false) String interviewResults,
-	    @RequestParam(required = false) String personalHistory,
-	    @RequestParam(required = false) String interviewMaterial,
-	    @RequestParam(required = false) String interviewProgress,
-	    @RequestParam(required = false) String interviewCompleted,
-	    @RequestParam(required = false) String interviewQnA,
-	    @RequestParam(required = false) String interviewTip,
-	    @RequestParam(required = false) Integer practiceScore,
-	    @RequestParam(required = false) String practiceComment,
-	    @RequestParam(required = false) String educationalBackground,
-	    @RequestParam(required = false) String practiceExperience,
-	    @RequestParam(required = false) String practiceReview,
-	    @RequestParam(required = false) String practiceAtmosphere
-	) {
-	    String salaryOptionsStr = (salaryOptions != null && !salaryOptions.isEmpty()) ? String.join(",", salaryOptions) : null;
-	    String welfareOptionsStr = (welfareOptions != null && !welfareOptions.isEmpty()) ? String.join(",", welfareOptions) : null;
+	public String doModify(@ModelAttribute ArticleModifyDTO modifyDTO, Model model) {
+	    MultipartFile file = modifyDTO.getWorkCertFile();
+	    if (file != null && !file.isEmpty()) {
+	        String savedFileName = fileService.saveFile(modifyDTO.getId(), file);
+	        modifyDTO.setWorkCertFileName(savedFileName); 
+	    }
 
-	    articleService.modifyArticle(
-	        institutionName, id, workType, city, institutionType, institutionComment,
-	        salaryOptionsStr, welfareOptionsStr, salaryComment, welfareComment, environmentComment, commuteTimeComment,
-	        salaryScore, welfareScore, environmentScore, interviewScore, interviewComment, interviewResults, personalHistory,
-	        interviewMaterial, interviewProgress, interviewCompleted, interviewQnA, interviewTip,
-	        practiceScore, practiceComment, educationalBackground, practiceExperience, practiceReview, practiceAtmosphere
-	    );
+	    articleService.modifyArticle(modifyDTO);
 
-	    return Util.jsReplace(String.format("%d번 게시물을 수정했습니다", id), String.format("detail?id=%d", id));
+	    List<FileDto> files = fileService.getFilesByRelId(modifyDTO.getId());
+	    model.addAttribute("files", files);
+
+	    return Util.jsReplace(String.format("%d번 게시물을 수정했습니다", modifyDTO.getId()), String.format("detail?id=%d", modifyDTO.getId()));
 	}
 
 
-	
 	@GetMapping("/usr/article/delete")
 	@ResponseBody
 	public String delete(int id, int boardId) {

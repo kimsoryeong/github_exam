@@ -12,10 +12,10 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.example.demo.dto.Article;
-import com.example.demo.dto.FileDto;
 import com.example.demo.dto.Member;
 import com.example.demo.service.AdminService;
-import com.example.demo.service.FileService;
+import com.example.demo.service.ArticleService;
+import com.example.demo.service.MemberService;
 import com.example.demo.util.Util;
 
 
@@ -24,14 +24,25 @@ import com.example.demo.util.Util;
 public class AdminController {
 
 	@Autowired
-    private AdminService adminService;
+    private MemberService memberService;
+	
 	@Autowired
-	private FileService fileService;
+	private AdminService adminService;
+
+    @Autowired
+    private ArticleService articleService;
 
     @GetMapping("/dashboard")
-    public String adminDashboard() {
+    public String showDashboard(Model model) {
+        List<Member> institutionList = memberService.getPendingInstitutions();
+        List<Article> reviews = articleService.getPendingReviews();
+
+        model.addAttribute("institutionList", institutionList);
+        model.addAttribute("reviews", reviews);
+
         return "admin/dashboard";
     }
+
 
     @GetMapping("/institution/list")
     public String institutionList(Model model) {
@@ -75,6 +86,8 @@ public class AdminController {
         return Util.jsReplace("리뷰가 반려 처리 되었습니다", "/admin/review/list");
     }
     
+    
+
   
 
 }

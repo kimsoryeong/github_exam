@@ -20,9 +20,16 @@ public class Member {
 	private int authLevel;  
 	private String workChkFile;
 	public int reviewStatus; 
-	public int approveStatus;{
-		
-	}
+	public int approveStatus;
+	private Integer workChkFileId;
+	private String workChkFileName;
+	private String rejectReason;
 
+	public String getWorkChkFileName() {
+	    return workChkFileName;
+	}
+	public void setWorkChkFileName(String workChkFileName) {
+	    this.workChkFileName = workChkFileName;
+	}
 	
 }
