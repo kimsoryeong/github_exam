@@ -3,88 +3,87 @@ CREATE DATABASE KinderReview;
 USE KinderReview;
 
 CREATE TABLE `file` (
-  `id` INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
-  `regDate` DATETIME NOT NULL,
-  `originName` VARCHAR(255) NOT NULL,
-  `savedName` VARCHAR(255) NOT NULL,
-  `savedPath` VARCHAR(500) NOT NULL,
-  `relTypeCode` VARCHAR(50) DEFAULT NULL,
-  `relId` INT DEFAULT NULL
+  id INT NOT NULL AUTO_INCREMENT PRIMARY KEY
+  ,regDate DATETIME NOT NULL
+  ,originName VARCHAR(255) NOT NULL
+  ,savedName VARCHAR(255) NOT NULL
+  ,savedPath VARCHAR(500) NOT NULL
+  ,relTypeCode VARCHAR(50) DEFAULT NULL
+  ,relId INT DEFAULT NULL
 );
 
 
 CREATE TABLE `member` (
-    id INT UNSIGNED PRIMARY KEY AUTO_INCREMENT,
-    regDate DATETIME NOT NULL,
-    updateDate DATETIME NOT NULL,
-    loginId VARCHAR(50) NOT NULL UNIQUE,
-    loginPw VARCHAR(100) NOT NULL,
-    nickname VARCHAR(50) DEFAULT NULL,
-    institutionName VARCHAR(255) DEFAULT NULL,
-    institutionNumber VARCHAR(100) DEFAULT NULL,
-    authLevel INT UNSIGNED NOT NULL DEFAULT 1 COMMENT '0=관리자, 1=개인회원, 2=기업회원',
-    approveStatus TINYINT NOT NULL DEFAULT 1 COMMENT '0: 대기, 1: 승인, 2: 반려',
-    workChkFile VARCHAR(255) DEFAULT NULL COMMENT '사업자등록증 파일체크',
-    rejectReason VARCHAR(255) DEFAULT NULL COMMENT '반려 사유'
+    id INT UNSIGNED PRIMARY KEY AUTO_INCREMENT
+    ,regDate DATETIME NOT NULL
+    ,updateDate DATETIME NOT NULL
+    ,loginId VARCHAR(50) NOT NULL UNIQUE
+    ,loginPw VARCHAR(100) NOT NULL
+    ,nickname VARCHAR(50) DEFAULT NULL
+    ,institutionName VARCHAR(255) DEFAULT NULL
+    ,institutionNumber VARCHAR(100) DEFAULT NULL
+    ,authLevel INT UNSIGNED NOT NULL DEFAULT 1 COMMENT '0=관리자, 1=개인회원, 2=기업회원'
+    ,approveStatus TINYINT NOT NULL DEFAULT 1 COMMENT '0: 대기, 1: 승인, 2: 반려'
+    ,workChkFile VARCHAR(255) DEFAULT NULL COMMENT '사업자등록증 파일체크'
+    ,rejectReason VARCHAR(255) DEFAULT NULL COMMENT '반려 사유'
 );
 
 
 CREATE TABLE article(
-    id INT UNSIGNED PRIMARY KEY AUTO_INCREMENT,
-    regDate DATETIME NOT NULL,
-    updateDate DATETIME NOT NULL,
-    memberId INT UNSIGNED NOT NULL,
-    boardId INT UNSIGNED NOT NULL,
-    boardName VARCHAR(50),
-    institutionType VARCHAR(100),
-    institutionName VARCHAR(255),
-    institutionComment TEXT,
-    salaryScore INT DEFAULT 0,
-    welfareScore INT DEFAULT 0,
-    environmentScore INT DEFAULT 0,
-    salaryOptionsStr TEXT,
-    welfareOptionsStr TEXT,
-    salaryComment TEXT,
-    welfareComment TEXT,
-    environmentComment TEXT,
-    commuteTimeComment TEXT,
-    interviewScore INT,
-    interviewComment TEXT,
-    personalHistory TEXT,
-    interviewMaterial TEXT,
-    interviewQnA TEXT,
-    interviewResults TEXT,
-    interviewProgress TEXT,
-    interviewTip TEXT,
-    interviewCompleted TEXT,
-    workType VARCHAR(100),
-    city VARCHAR(100),
-    practiceComment TEXT,
-    practiceScore INT DEFAULT 0,
-    educationalBackground TEXT,
-    practiceAtmosphere TEXT,
-    practiceExperience TEXT,
-    practiceReview TEXT,
-    views INT UNSIGNED NOT NULL DEFAULT 0,
-    rejectReason VARCHAR(255) DEFAULT NULL COMMENT '반려 사유',
-    reviewStatus TINYINT NOT NULL DEFAULT 0 COMMENT '0:대기, 1:승인, 2:반려',
-    title VARCHAR(50),
-    content TEXT,
-    phoneNumber TEXT,
-    hireSalary TEXT,
-    nickname VARCHAR(50)
+    id INT UNSIGNED PRIMARY KEY AUTO_INCREMENT
+    ,regDate DATETIME NOT NULL
+    ,updateDate DATETIME NOT NULL
+    ,memberId INT UNSIGNED NOT NULL
+    ,boardId INT UNSIGNED NOT NULL
+    ,boardName VARCHAR(50)
+    ,institutionType VARCHAR(100)
+    ,institutionName VARCHAR(255)
+    ,institutionComment TEXT
+    ,salaryScore INT DEFAULT 0
+    ,welfareScore INT DEFAULT 0
+    ,environmentScore INT DEFAULT 0
+    ,salaryOptionsStr TEXT
+    ,welfareOptionsStr TEXT
+    ,salaryComment TEXT
+    ,welfareComment TEXT
+    ,environmentComment TEXT
+    ,commuteTimeComment TEXT
+    ,interviewScore INT
+    ,interviewComment TEXT
+    ,personalHistory TEXT
+    ,interviewMaterial TEXT
+    ,interviewQnA TEXT
+    ,interviewResults TEXT
+    ,interviewProgress TEXT
+    ,interviewTip TEXT
+    ,interviewCompleted TEXT
+    ,workType VARCHAR(100)
+    ,city VARCHAR(100)
+    ,practiceComment TEXT
+    ,practiceScore INT DEFAULT 0
+    ,educationalBackground TEXT
+    ,practiceAtmosphere TEXT
+    ,practiceExperience TEXT
+    ,practiceReview TEXT
+    ,views INT UNSIGNED NOT NULL DEFAULT 0
+    ,rejectReason VARCHAR(255) DEFAULT NULL COMMENT '반려 사유'
+    ,reviewStatus TINYINT NOT NULL DEFAULT 0 COMMENT '0:대기, 1:승인, 2:반려'
+    ,title VARCHAR(50)
+    ,content TEXT
+    ,phoneNumber TEXT
+    ,hireSalary TEXT
+    ,nickname VARCHAR(50)
+    ,deadline DATE
+    ,fileName VARCHAR(255);
 );
 
 
-ALTER TABLE article ADD COLUMN deadline DATE;
-
-
 CREATE TABLE article_option (
-    id INT UNSIGNED PRIMARY KEY AUTO_INCREMENT,
-    articleId INT UNSIGNED NOT NULL,
-    TYPE VARCHAR(20) NOT NULL, -- 'salary', 'welfare', 'environment'
-    VALUE VARCHAR(100) NOT NULL,
-    FOREIGN KEY (articleId) REFERENCES article(id) ON DELETE CASCADE
+    id INT UNSIGNED PRIMARY KEY AUTO_INCREMENT
+    ,articleId INT UNSIGNED NOT NULL
+    ,TYPE VARCHAR(20) NOT NULL, -- 'salary', 'welfare', 'environment'
+    ,VALUE VARCHAR(100) NOT NULL
+    ,FOREIGN KEY (articleId) REFERENCES article(id) ON DELETE CASCADE
 );
 
 
@@ -163,13 +162,13 @@ INSERT INTO board
 INSERT INTO board
     SET boardName = '채용 공고';
     
-    INSERT INTO board
+INSERT INTO board
     SET boardName = '공지사항';
     
-  INSERT INTO board
+INSERT INTO board
     SET boardName = '자유게시판';
     
-     INSERT INTO board
+INSERT INTO board
     SET boardName = '질문게시판';  
     
 INSERT INTO article
@@ -193,44 +192,46 @@ INSERT INTO article
         , commuteTimeComment = '8:00~ 19:00';
         
 INSERT INTO article
-    SET regDate = NOW(),
-        updateDate = NOW(),
-        memberId = 1,
-        boardId = 5,
-        reviewStatus = 1,
-        boardName = '면접 리뷰',
-        institutionName = '햇살 어린이집',
-        institutionComment = '친절한 면접분위기입니다',
-        city = '부산',
-        workType = '보조교사',
-        institutionType = '어린이집',
-        interviewScore = 3,
-        interviewProgress = '면접진행과정',
-        interviewTip = '면접 조언과 팁',
-        interviewCompleted ='면접 마무리 진행과정',
-        interviewComment = '친절하고 편안한 분위기였어요.',
-        personalHistory = '신입 교사',
-        interviewMaterial = '면접 준비물',
-        interviewQnA = '1. 지원동기, 2. 갈등상황 해결법',
-        interviewResults = '합격';            
+    SET regDate = NOW()
+        ,updateDate = NOW()
+        ,memberId = 1
+        ,boardId = 5
+        ,reviewStatus = 1
+        ,boardName = '면접 리뷰'
+        ,institutionName = '햇살 어린이집'
+        ,institutionComment = '친절한 면접분위기입니다'
+        ,city = '부산'
+        ,workType = '보조교사'
+        ,institutionType = '어린이집'
+        ,interviewScore = 3
+        ,interviewProgress = '면접진행과정'
+        ,interviewTip = '면접 조언과 팁'
+        ,interviewCompleted ='면접 마무리 진행과정'
+        ,interviewComment = '친절하고 편안한 분위기였어요.'
+        ,personalHistory = '신입 교사'
+        ,interviewMaterial = '면접 준비물'
+        ,interviewQnA = '1. 지원동기, 2. 갈등상황 해결법'
+        ,interviewResults = '합격'
+        , reviewStatus = 1;             
 
 INSERT INTO article
-    SET regDate = NOW(),
-        updateDate = NOW(),
-        memberId = 1,
-        boardId = 6,
-        reviewStatus = 1,
-        boardName = '실습 및 봉사 리뷰',
-        institutionName = '굿모닝 어린이집',
-        practiceComment = '친절한 실습분위기입니다',
-        city = '대전',
-        workType = '실습 및 봉사생',
-        institutionType = '어린이집',
-        practiceExperience ='실습하며 나의 경험',
-        practiceReview ='실습봉사소감',
-        educationalBackground = '4년제',
-        practiceAtmosphere = '기관분위기는 어저구',
-        practiceScore ='3';            
+    SET regDate = NOW()
+        , updateDate = NOW()
+        , memberId = 1
+        , boardId = 6
+        , reviewStatus = 1
+        , boardName = '실습 및 봉사 리뷰'
+        , institutionName = '굿모닝 어린이집'
+        , practiceComment = '친절한 실습분위기입니다'
+        , city = '대전'
+        , workType = '실습 및 봉사생'
+        , institutionType = '어린이집'
+        , practiceExperience ='실습하며 나의 경험'
+        , practiceReview ='실습봉사소감'
+        , educationalBackground = '4년제'
+        , practiceAtmosphere = '기관분위기는 어저구'
+        , practiceScore ='3'
+        , reviewStatus = 1;            
  
 INSERT INTO article 
 (regDate, updateDate, memberId, boardId, boardName, institutionType, institutionName, reviewStatus,
@@ -258,7 +259,8 @@ VALUES
 (NOW(), NOW(), 1, 4, '근무 리뷰', '어린이집', '행복어린이집', 1,
  4, 3, 5, '연봉,상여금', '방학',
  '연봉이 만족스러움', '복지가 좋음', '환경 깨끗함', '통근 시간 30분', '정규직', '서울', 10, '좋았던근무');
-       
+   
+   
 INSERT INTO `member`
     SET regDate = NOW()
         , updateDate = NOW()

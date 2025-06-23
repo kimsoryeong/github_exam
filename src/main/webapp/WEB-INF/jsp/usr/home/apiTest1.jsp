@@ -6,21 +6,34 @@
 
 <%@ include file="/WEB-INF/jsp/common/header.jsp" %>
 
-
 	<script>
-		const api_key = 'TYVGBMLA-TYVG-TYVG-TYVG-TYVGBMLAF1';
-		const url = 'http://e-childschoolinfo.moe.go.kr/openApi/openApiIntro.do?pageName=openApiIntro4';
+		const api_key = 'SM69Y0vg2XMMU/gdP86ol+V+A4TF/OlorBAuweSvglYR4xIFFajCJFjME/Xud2UymFZDOe4oxcqXqOFhOJ7HKw==';
+		const url = 'https://apis.data.go.kr/6300000/openapi2022/kinderschInfo/getkinderschInfo';
 		
 		const apiTest = function (){
 			$.ajax({
 				url: url,
 				type: 'GET',
 				data: {
-					
+					serviceKey: api_key ,
+					gu: 'A',
+					pageNo: 1,
+					numOfRows: 1000 
 				},
-				dataType: 'XML',
+				dataType: 'json',
 				success: function (data){
-					console.log(data);
+					
+					let a = data.response.body.items;
+					
+					for(idx in a){
+						let item = a[idx]; 
+					    let name = item.kndrgrNm;
+					    let city = item.signgu;
+					    let addr = item.locpic;
+					    let tel = item.telno;
+						
+					}
+					
 				},
 				error: function (xhr, status, error) {
 					console.log(error);
@@ -34,8 +47,7 @@
 	
 	<section class="mt-8">
 		<div class="container mx-auto">
-			<div>api test 페이지</div>
-			<div id="apiTest"></div>
+			
 		</div>
 	</section>
 
