@@ -45,10 +45,12 @@
 		  <c:if test="${authLevel == 1}">
 		  <div class="text-gray-500">아이디 : ${member.loginId}</div>
 		  <div class="text-gray-500">닉네임 : ${member.nickname}</div>
+		  <div class="text-gray-500">지역 : ${member.address}</div>
 		  </c:if>
 		  <c:if test="${authLevel == 2}">
 		  <div class="text-gray-500">아이디 : ${member.loginId}</div>
-		  <div class="text-gray-500">기관명 : ${member.nickname}</div>
+		  <div class="text-gray-500">기관명 : ${member.institutionName}</div>
+		  <div class="text-gray-500">기관주소 : ${member.address} ${member.addressDetail} [${member.zipCode}]</div>
 		  <div class="text-gray-500">기관번호 : ${member.institutionNumber}</div>
 		  <div class="text-gray-500">사업자등록증
 			<c:choose>

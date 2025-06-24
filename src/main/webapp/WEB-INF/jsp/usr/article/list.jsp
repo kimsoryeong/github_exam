@@ -25,14 +25,14 @@
 		  <button
 		    class="bg-orange-400 hover:bg-orange-500 text-white px-4 py-1 rounded-lg font-semibold shadow transition"
 		    onclick="location.href='/usr/article/mainWrite?boardId=${boardId}'">
-		    기관 리뷰 글쓰기
+		    글쓰기
 		  </button>
 		</c:if>
 	 <c:if test="${isLogined && (authLevel == 1 || authLevel == 0) && (boardId == 3 || boardId == 10 || boardId == 11 || boardId == 12)}"> 
 		  <button
 		    class="bg-orange-400 hover:bg-orange-500 text-white px-4 py-1 rounded-lg font-semibold shadow transition"
 		    onclick="location.href='/usr/article/communityWrite'">
-		    커뮤니티 글쓰기
+		    글쓰기
 		  </button>
 		</c:if>
 	 
@@ -40,7 +40,7 @@
 		  <button
 		    class="bg-orange-400 hover:bg-orange-500 text-white px-4 py-1 rounded-lg font-semibold shadow transition"
 		    onclick="location.href='/usr/article/hireWrite'">
-		    채용공고 글쓰기
+		    글쓰기
 		  </button>
 		</c:if>
 
@@ -348,14 +348,13 @@
             </div>
           </c:if>
 		</c:if>
-	<c:if test="${board.id == 1  or board.id == 7 or board.id == 8 or board.id == 9 or board.id == 10 or board.id == 11 or board.id == 12}">
+	<c:if test="${board.id == 9 or board.id == 10 or board.id == 11 or board.id == 12}">
 		<div class="bg-white rounded-lg shadow p-4 mb-4 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
           <form method="get" action="/usr/article/list" class="flex items-center gap-2">
             <input type="hidden" name="boardId" value="${board.id}" />
             <label for="city" class="text-sm font-medium text-gray-700">지역</label>
             <select id="city" name="city" onchange="updateDistricts()" class="border border-gray-300 rounded-md px-3 py-2 outline-none">
               <option value="" disabled selected>시/도</option>
-              <option value="전체">전체</option>
               <option value="서울">서울</option>
               <option value="대전">대전</option>
               <option value="대구">대구</option>
@@ -409,6 +408,7 @@
 			</div>
 			</c:if>
              <c:if test="${board.id == 9}">
+             ${article.institutionName}
              <div class="flex justify-between text-xs text-gray-400 pt-2">
 			    <div class="flex justify-start space-x-2">
 			        <span>${article.institutionName}</span>
@@ -430,9 +430,49 @@
             </div>
           </c:if>
 		</c:if>
+	<c:if test="${board.id == 1 or board.id == 7 or board.id == 8}">
+		<div class="bg-white rounded-lg shadow p-4 mb-4 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+          <form method="get" action="/usr/article/list" class="flex items-center gap-2">
+            <input type="hidden" name="boardId" value="${board.id}" />
+            <label for="city" class="text-sm font-medium text-gray-700">지역</label>
+            <select id="city" name="city" onchange="updateDistricts()" class="rounded-md px-3 py-2 outline-none">
+              <option value="" disabled selected>시/도</option>
+              <option value="전체">전체</option>
+              <option value="서울">서울</option>
+              <option value="대전">대전</option>
+              <option value="대구">대구</option>
+              <option value="부산">부산</option>
+              <option value="인천">인천</option>
+              <option value="광주">광주</option>
+              <option value="세종">세종</option>
+              <option value="울산">울산</option>
+              <option value="강원">강원</option>
+              <option value="경기">경기</option>
+              <option value="경남">경남</option>
+              <option value="경북">경북</option>
+              <option value="전남">전남</option>
+              <option value="전북">전북</option>
+              <option value="제주">제주</option>
+              <option value="충남">충남</option>
+              <option value="충북">충북</option>
+            </select>
+            <button type="submit" class="bg-orange-100 hover:bg-orange-300 text-orange-700 px-4 py-2 rounded-md transition">조회</button>
+          </form>
+          <form action="/usr/article/list" method="get" class="flex items-center gap-2">
+            <input type="hidden" name="boardId" value="${board.id}" />
+            <select name="searchType" class="border border-gray-300 px-2 py-2 ">
+              <option selected value="">선택</option>
+              <option value="title">제목</option>
+              <option value="content">내용</option>
+              <option value="title+content">제목+내용</option>
+            </select>
+            <input type="text" name="keyword" id="keyword" class="border border-gray-300 rounded-md px-2 py-2 outline-none" placeholder="검색어 입력">
+            <button class="bg-orange-100 hover:bg-orange-300 text-orange-700 px-4 py-2 rounded-md transition" type="submit">검색</button>
+          </form>
         </div>
-        
-        
+         <div id="dataContainer" class=" mx-auto"></div>
+		</c:if>
+        </div>
         <div class="flex justify-center pt-6">
           <div class="flex border-white  text-sm overflow-hidden ">
             <c:set var="queryString" value="?boardId=${board.getId()}" />
@@ -465,6 +505,54 @@
   </div>
 </section>
 
+<script>
+    const api_key = 'SM69Y0vg2XMMU/gdP86ol+V+A4TF/OlorBAuweSvglYR4xIFFajCJFjME/Xud2UymFZDOe4oxcqXqOFhOJ7HKw==';
+    const url = 'https://apis.data.go.kr/6300000/openapi2022/kinderschInfo/getkinderschInfo';
 
+    function apiTest() {
+        $.ajax({
+            url: url,
+            type: 'GET',
+            data: {
+                serviceKey: api_key,
+                gu: 'A',
+                pageNo: 1,
+                numOfRows: 1000,
+                _type: 'json'
+            },
+            dataType: 'json',
+            success: function (data) {
+                const items = data.response?.body?.items || [];
+
+                let html = '';
+                if (items.length === 0) {
+                    html = '<p>데이터가 없습니다.</p>';
+                } else {
+                    items.forEach((item, i) => {
+                        const name = item.kndrgrNm || '이름 없음';
+                        const city = item.signgu || '지역 없음';
+                        const addr = item.locplc || '주소 없음';
+                        const tel = item.telno || '전화 없음';
+
+                        html += `
+                            <div class="p-4 mb-4 border-b bg-white">
+                        	   <div class="text-lg font-bold text-orange-600">${'$'}{name}</div>
+						    <div>대전광역시 ${'$'}{city} | 대전광역시 ${'$'}{addr}</div>
+						    <div>042-${'$'}{tel}</div>
+						  </div>
+                        `;
+                    });
+                }
+
+                document.getElementById("dataContainer").innerHTML = html;
+            },
+            error: function (xhr, status, error) {
+                console.error("API 호출 실패", error);
+            }
+        });
+    }
+
+    document.addEventListener("DOMContentLoaded", apiTest);
+</script>
 
 <%@ include file="/WEB-INF/jsp/common/footer.jsp" %>

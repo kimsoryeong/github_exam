@@ -212,10 +212,20 @@ public class UsrArticleController {
 	
 	@GetMapping("/usr/article/hireWritePage")
 	public String hireWritePage(Model model) {
-		Article article = new Article(); 
-		model.addAttribute("article", article);
-	    return "usr/article/hireWrite"; 
+	    LoginedMember loginedMember = req.getLoginedMember();
+	    if (loginedMember == null) {
+	        return "redirect:/usr/member/login";  
+	    }
+	    
+	    Member member = memberService.getMemberById(loginedMember.getId());
+	    Article article = new Article();
+
+	    model.addAttribute("article", article);
+	    model.addAttribute("member", member); 
+
+	    return "usr/article/hireWrite";
 	}
+
 	
 	@GetMapping("/usr/article/communityWrite")
 	@ResponseBody
@@ -292,6 +302,7 @@ public class UsrArticleController {
 
 	    article.calculateStar();
 	    model.addAttribute("article", article);
+	    model.addAttribute("member", memberService.getMemberById(article.getMemberId()));
 	    model.addAttribute("board", board);
 	    model.addAttribute("replies", replies);  
 	    model.addAttribute("relId", id);
@@ -420,6 +431,10 @@ public class UsrArticleController {
 	}
 	
 
-	
+	@GetMapping("/usr/article/institutionXml")
+	public String institutionXmlPage() {
+		return "usr/article/institutionXml"; 
+	}
+
 	
 }

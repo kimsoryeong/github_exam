@@ -21,30 +21,25 @@ public class MemberService {
 		this.fileService = fileService;
 	}
 
-	public void joinPersonalMember(String loginId, String loginPw, String nickname) {
+	public void joinPersonalMember(String loginId, String loginPw, String nickname, String address) {
 		Member member = new Member();
 		member.setLoginId(loginId);
 		member.setLoginPw(loginPw);
 		member.setNickname(nickname);
+		member.setAddress(address);
 		member.setAuthLevel(1);
 		member.setApproveStatus(1);
 		
-		memberDao.joinPersonalMember(loginId, loginPw, nickname);
+		memberDao.joinPersonalMember(loginId, loginPw, nickname, address);
 	}
 
-	public int joinInstitutionMember(String loginId, String loginPw, String nickname, String institutionNumber) {
-        Member member = new Member();
-        member.setLoginId(loginId);
-        member.setLoginPw(loginPw);
-        member.setNickname(nickname);
-        member.setInstitutionNumber(institutionNumber);
-        member.setAuthLevel(2);
-        member.setApproveStatus(0);
-        
-        memberDao.joinInstitutionMember(member);
+	public int joinInstitutionMember(Member member) {
+	    member.setAuthLevel(2);
+	    member.setApproveStatus(0);
+	    memberDao.joinInstitutionMember(member);
+	    return member.getId();
+	}
 
-        return member.getId();  
-    }
 
 
 	public Member getMemberByLoginId(String loginId) {
@@ -88,6 +83,9 @@ public class MemberService {
 	public void updateWorkChkFile(int memberId, String savedName) {
 	    memberDao.updateWorkChkFile(memberId, savedName);
 	}
+
+	
+	
 
 
 	

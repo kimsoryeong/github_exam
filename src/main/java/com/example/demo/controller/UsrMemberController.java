@@ -7,7 +7,6 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -23,6 +22,8 @@ import com.example.demo.service.FileService;
 import com.example.demo.service.MemberService;
 import com.example.demo.service.ReplyService;
 import com.example.demo.util.Util;
+
+import jakarta.servlet.http.HttpSession;
 
 
 @Controller
@@ -59,34 +60,26 @@ public class UsrMemberController {
 	
 	@PostMapping("/usr/member/doPersonalJoin")
 	@ResponseBody
-	public String doPersonalJoin(String loginId, String loginPw, String nickname) {
-		memberService.joinPersonalMember(loginId, loginPw, nickname);
+	public String doPersonalJoin(String loginId, String loginPw, String nickname, String address) {
+		memberService.joinPersonalMember(loginId, loginPw, nickname, address);
 		return Util.jsReplace(String.format("[ %s ] 님의 개인회원 가입이 완료되었습니다", nickname), "/");
 	}
 	
 	@PostMapping("/usr/member/doInstitutionJoin")
 	@ResponseBody
-	public String doInstitutionJoin(
-	    String loginId, 
-	    String loginPw, 
-	    String nickname, 
-	    String institutionNumber, 
-	    MultipartFile bizFile
-	) throws IOException {
-	    int memberId = memberService.joinInstitutionMember(loginId, loginPw, nickname, institutionNumber);
-	    
+	public String doInstitutionJoin(Member member, MultipartFile bizFile) throws IOException {
+	    int memberId = memberService.joinInstitutionMember(member);
+
 	    if (!bizFile.isEmpty()) {
 	        String savedName = fileService.saveFile(bizFile, "member", memberId);
 	        memberService.updateWorkChkFile(memberId, savedName); 
 	    }
 
-	    String msg = String.format("[ %s ] 님, 가입 신청이 완료되었습니다. 관리자의 승인은 로그인 후 마이페이지에서 확인할 수 있습니다.", nickname);
+	    String msg = String.format("[ %s ] 님, 가입 신청이 완료되었습니다. 관리자의 승인은 로그인 후 마이페이지에서 확인할 수 있습니다.", member.getInstitutionName());
 	    return Util.jsReplace(msg, "/usr/member/myPage");
 	}
 
 
-
-	
 	@GetMapping("/usr/member/nicknameDupChk")
 	@ResponseBody
 	public ResultData nicknameDupChk(String nickname) {
@@ -115,7 +108,7 @@ public class UsrMemberController {
 	
 	@PostMapping("/usr/member/doLogin")
 	@ResponseBody
-	public String doLogin(String loginId, String loginPw) {
+	public String doLogin(String loginId, String loginPw, HttpSession session) {
 		
 		Member member = this.memberService.getMemberByLoginId(loginId);
 		
@@ -128,7 +121,7 @@ public class UsrMemberController {
 		}
 		
 		this.req.login(new LoginedMember(member.getId(), member.getAuthLevel(), member.getNickname(), member.getApproveStatus()));
-
+		session.setAttribute("member", member);
 		
 		return Util.jsReplace(String.format("[ %s ] 님 환영합니다", member.getLoginId()), "/");
 	}
@@ -163,7 +156,7 @@ public class UsrMemberController {
 	    }
 
 	    model.addAttribute("workChkFile", workChkFile);
-
+	    model.addAttribute("member", member);
 	    model.addAttribute("myArticles", myArticles);
 	    model.addAttribute("member", member);
 	    model.addAttribute("likedArticles", likedArticleList);
